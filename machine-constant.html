@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Machine Constant</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080d;--bg1:#0b0e1a;--bg2:#0f1420;--bg3:#141a2c;--bg4:#1a2236;
+  --bd:#1c2540;--bd2:#243060;--bd3:#2d3c78;
+  --tx:#cdd6f0;--tx2:#6a7fa8;--tx3:#344066;
+  --cy:#38d4f5;--cy2:#0b3d54;--cy3:rgba(56,212,245,.1);
+  --gn:#2dd88a;--gn2:#0a3520;
+  --rd:#f05060;--rd2:#3d0e18;
+  --pu:#a78bfa;--pu2:#2a1f54;
+  --or:#f5a623;--or2:#3d2508;
+  --ye:#ffd84d;--pk:#f472b6;
+  --r:5px;--rl:9px;--rll:13px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font:12px/1.5 'SF Mono',ui-monospace,monospace}
+
+/* ── TOPBAR ─────────────────────────────────────────────────── */
+#topbar{display:flex;align-items:center;gap:6px;padding:0 14px;height:46px;background:linear-gradient(90deg,var(--bg1),var(--bg2));border-bottom:1px solid var(--bd);box-shadow:0 2px 16px rgba(0,0,0,.5);flex-shrink:0;z-index:10}
+.brand{font-size:13px;font-weight:700;color:var(--cy);letter-spacing:.06em;margin-right:6px;text-shadow:0 0 20px rgba(56,212,245,.4)}
+.brand span{color:var(--tx2);font-weight:400}
+.tb-sep{width:1px;height:20px;background:var(--bd);margin:0 2px}
+.tb-btn{padding:5px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx2);font:11px/1 'SF Mono',monospace;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tb-btn:hover{border-color:var(--cy);color:var(--cy);background:var(--cy3)}
+.tb-btn.primary{border-color:var(--cy2);background:var(--cy2);color:var(--cy);font-weight:600}
+.tb-btn.primary:hover{background:#0e4d68}
+.tb-btn.danger:hover{border-color:var(--rd);color:var(--rd);background:rgba(240,80,96,.1)}
+.bus-pill{margin-left:auto;display:flex;align-items:center;gap:7px;padding:4px 12px;border-radius:20px;border:1px solid var(--bd2);background:var(--bg3);font-size:11px;color:var(--tx2);transition:border-color .2s}
+.bus-dot{width:7px;height:7px;border-radius:50%;background:var(--gn);box-shadow:0 0 6px var(--gn);flex-shrink:0}
+@keyframes ring{0%{transform:scale(1);opacity:1}100%{transform:scale(2.8);opacity:0}}
+.pulse-anim{animation:ring .4s ease-out}
+
+/* ── APP LAYOUT ─────────────────────────────────────────────── */
+#app{display:flex;height:calc(100vh - 46px - 24px);overflow:hidden}
+
+/* ── SIDEBAR ────────────────────────────────────────────────── */
+#sidebar{width:230px;flex-shrink:0;background:var(--bg1);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
+.panel-hd{display:flex;align-items:center;justify-content:space-between;padding:0 10px;height:36px;border-bottom:1px solid var(--bd);background:var(--bg2);flex-shrink:0}
+.panel-hd-label{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase}
+.panel-hd-btn{width:20px;height:20px;border-radius:4px;border:1px solid var(--bd2);background:transparent;color:var(--cy);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.panel-hd-btn:hover{background:var(--cy2)}
+#tree{flex:1;overflow-y:auto;padding:5px}
+
+.tree-row{display:flex;align-items:center;gap:5px;padding:4px 6px 4px 8px;cursor:pointer;border-radius:var(--r);margin-bottom:1px;transition:background .1s;user-select:none;position:relative}
+.tree-row::before{content:'';position:absolute;left:0;top:15%;height:70%;width:2px;border-radius:2px;background:transparent;transition:background .15s}
+.tree-row:hover{background:var(--bg3)}
+.tree-row.sel{background:var(--bg3)}
+.tree-row.sel::before{background:var(--cy)}
+.tree-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tree-name{flex:1;font-size:11px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tree-tag{font-size:9px;padding:1px 4px;border-radius:3px;background:var(--bg4);color:var(--tx3);border:1px solid var(--bd)}
+.tree-rm{width:16px;height:16px;display:none;align-items:center;justify-content:center;border-radius:3px;border:none;background:none;color:var(--tx3);cursor:pointer;font-size:13px;line-height:1;flex-shrink:0}
+.tree-row:hover .tree-rm{display:flex}
+.tree-rm:hover{color:var(--rd)}
+
+/* ── INSPECTOR ──────────────────────────────────────────────── */
+#inspector{flex:1;overflow-y:auto;background:var(--bg);display:flex;flex-direction:column;min-width:0}
+.ins-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.ins-empty-icon{font-size:38px;color:var(--tx3);opacity:.2}
+.ins-empty-h{font-size:13px;color:var(--tx2);font-weight:600}
+.ins-empty-s{font-size:11px;color:var(--tx3)}
+
+.ins-hd{padding:12px 16px;border-bottom:1px solid var(--bd);background:var(--bg1);flex-shrink:0;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.ins-hd-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ins-accent{width:3px;height:22px;border-radius:2px;flex-shrink:0}
+.ins-name-inp{flex:1;min-width:0;background:transparent;border:none;font:700 15px/1 'SF Mono',monospace;color:var(--tx);outline:none}
+.ins-name-inp:focus{color:var(--cy)}
+.ins-id{font-size:10px;color:var(--tx3);letter-spacing:.04em}
+.ins-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px}
+.ins-field{display:flex;flex-direction:column;gap:3px}
+.ins-field-label{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.ins-field input,.ins-field select{padding:5px 8px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--tx);font:11px 'SF Mono',monospace;outline:none;width:100%;transition:border-color .15s,box-shadow .15s}
+.ins-field input:focus,.ins-field select:focus{border-color:var(--cy);box-shadow:0 0 0 2px rgba(56,212,245,.12)}
+.ins-field-inline{display:flex;align-items:center;gap:6px;padding:6px 0}
+.ins-field-inline input[type=checkbox]{width:14px;height:14px;accent-color:var(--cy);cursor:pointer}
+.ins-field-inline label{font-size:11px;color:var(--tx2);cursor:pointer}
+
+/* Collapsible sections */
+.ins-section{border-bottom:1px solid var(--bd)}
+.sec-hd{display:flex;align-items:center;gap:7px;padding:9px 16px;cursor:pointer;user-select:none;background:var(--bg1);transition:background .1s}
+.sec-hd:hover{background:var(--bg2)}
+.sec-toggle{font-size:8px;color:var(--tx3);transition:transform .2s;flex-shrink:0;line-height:1}
+.sec-hd.collapsed .sec-toggle{transform:rotate(-90deg)}
+.sec-label{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase}
+.sec-count{margin-left:auto;font-size:9px;padding:1px 6px;border-radius:10px;background:var(--bg3);color:var(--tx3);border:1px solid var(--bd)}
+.sec-body{padding:10px 16px;display:flex;flex-direction:column;gap:6px}
+.sec-body.collapsed{display:none}
+
+/* DOM Listener rows */
+.dl-row{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.dl-row select,.dl-row input{flex:1;padding:4px 7px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--tx);font:11px 'SF Mono',monospace;outline:none;min-width:0}
+.dl-row select:focus,.dl-row input:focus{border-color:var(--cy)}
+.kw{font-size:10px;color:var(--tx3);flex-shrink:0}
+.btn-rm{background:none;border:1px solid var(--bd);border-radius:4px;color:var(--tx3);cursor:pointer;padding:3px 7px;font-size:11px;flex-shrink:0;transition:all .12s}
+.btn-rm:hover{color:var(--rd);border-color:var(--rd)}
+.add-row{display:flex;align-items:center;gap:5px;padding-top:6px;border-top:1px dashed var(--bd2)}
+.add-row select,.add-row input{flex:1;padding:4px 7px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--tx);font:11px 'SF Mono',monospace;outline:none;min-width:0}
+.add-row select:focus,.add-row input:focus{border-color:var(--cy)}
+.btn-add{padding:4px 10px;border-radius:var(--r);border:1px solid var(--gn2);background:var(--gn2);color:var(--gn);font:11px 'SF Mono',monospace;cursor:pointer;flex-shrink:0;transition:background .15s}
+.btn-add:hover{background:#0f4028}
+
+/* Chips */
+.chip-kw{font-size:10px;color:var(--tx3)}
+.chip-ev{background:var(--cy2);color:var(--cy);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600}
+.chip-op{background:var(--pu2);color:var(--pu);border-radius:4px;padding:2px 6px;font-size:10px}
+.chip-val{background:var(--bg3);color:var(--or);border-radius:4px;padding:2px 6px;font-size:10px;border:1px solid var(--bd)}
+.chip-x{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:13px;line-height:1;padding:0 2px;transition:color .1s}
+.chip-x:hover{color:var(--rd)}
+
+/* Reaction cards */
+#rx-grid{display:flex;flex-direction:column;gap:5px}
+.rx-card{border:1px solid var(--bd);border-left-width:3px;border-radius:var(--rl);background:var(--bg1);overflow:hidden}
+.rx-hd{display:flex;align-items:center;gap:7px;padding:7px 10px;border-bottom:1px solid var(--bd);background:rgba(255,255,255,.025)}
+.rx-rm-all{margin-left:auto;background:none;border:1px solid transparent;border-radius:4px;color:var(--tx3);cursor:pointer;font-size:10px;padding:2px 6px;transition:all .12s}
+.rx-rm-all:hover{color:var(--rd);border-color:var(--rd2);background:rgba(240,80,96,.08)}
+.rx-effects{padding:6px 10px;display:flex;flex-direction:column;gap:4px;min-height:20px}
+.rx-effect{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.rx-arrow{font-size:10px;color:var(--tx3)}
+.rx-tname{font-size:11px;font-weight:600}
+.rx-tag-b{font-size:9px;color:var(--tx3);border:1px solid var(--bd);border-radius:3px;padding:0 3px}
+.rx-empty{font-size:10px;color:var(--tx3);padding:2px 0}
+.rx-add{display:flex;align-items:center;gap:4px;padding:6px 10px;background:rgba(0,0,0,.12);border-top:1px solid var(--bd)}
+.rx-add select,.rx-add input{padding:3px 6px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:10px 'SF Mono',monospace;outline:none;min-width:0}
+.rx-add select:focus,.rx-add input:focus{border-color:var(--cy)}
+.rx-go{padding:3px 9px;border-radius:var(--r);border:1px solid var(--gn2);background:var(--gn2);color:var(--gn);font:10px 'SF Mono',monospace;cursor:pointer;flex-shrink:0;transition:background .15s}
+.rx-go:hover{background:#0f4028}
+.rx-new{display:flex;align-items:center;gap:5px;padding:8px 0 2px;border-top:1px dashed var(--bd2);margin-top:4px;flex-wrap:wrap}
+.rx-new input,.rx-new select{padding:4px 7px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--tx);font:11px 'SF Mono',monospace;outline:none;min-width:0}
+.rx-new input:focus,.rx-new select:focus{border-color:var(--cy)}
+.rx-effect-wrap{display:flex;flex-direction:column;gap:2px}
+.cond-sel{padding:2px 5px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--cy);font:10px 'SF Mono',monospace;outline:none;flex-shrink:0}
+.cond-sel:focus{border-color:var(--cy)}
+.cond-val-inp{width:56px;padding:2px 5px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--or);font:10px 'SF Mono',monospace;outline:none}
+.rx-else-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:2px 0 2px 10px;border-left:2px solid var(--pu2);margin-top:1px}
+.btn-else{padding:1px 6px;border-radius:var(--r);border:1px solid var(--pu2);background:transparent;color:var(--pu);font:9px 'SF Mono',monospace;cursor:pointer;flex-shrink:0}
+.btn-else:hover{background:var(--pu2)}
+#rpane-db.active{display:flex;flex-direction:column}
+.db-layout{display:flex;flex:1;overflow:hidden;min-height:0}
+.db-sidebar{width:130px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
+.db-sidebar-hd{font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;padding:6px 8px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.db-col-item{display:flex;align-items:center;gap:4px;padding:5px 8px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--bd2);border-left:2px solid transparent}
+.db-col-item:hover{background:var(--bg3)}
+.db-col-item.active{background:var(--bg3);border-left-color:var(--cy)}
+.db-col-name{flex:1;font-size:10px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.db-col-add-row{display:flex;align-items:center;gap:4px;padding:6px 8px;border-top:1px dashed var(--bd2);margin-top:auto;flex-shrink:0}
+.db-content{flex:1;overflow:auto;display:flex;flex-direction:column;min-width:0}
+.db-no-cols,.db-no-docs{font-size:11px;color:var(--tx3);padding:16px;text-align:center}
+.db-table-wrap{overflow:auto;flex:1}
+.db-table{border-collapse:collapse;font-size:10px;min-width:100%}
+.db-table th,.db-table td{border:1px solid var(--bd);padding:0}
+.db-th{font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;padding:3px 6px;background:var(--bg2);white-space:nowrap}
+.db-doc-id,.db-doc-id-hd{font-size:9px;color:var(--tx3);padding:3px 6px;white-space:nowrap;background:var(--bg2)}
+.db-cell-inp{padding:2px 5px;border:none;background:var(--bg);color:var(--ye);font:10px 'SF Mono',monospace;outline:none;width:100%;min-width:60px}
+.db-cell-inp:focus{background:var(--bg2);box-shadow:inset 0 0 0 1px var(--cy)}
+.db-doc-actions{display:flex;align-items:center;gap:6px;padding:8px;border-top:1px dashed var(--bd2);flex-shrink:0}
+.db-new-inp{padding:3px 6px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--tx);font:10px 'SF Mono',monospace;outline:none;min-width:0;flex:1}
+.db-new-inp:focus{border-color:var(--cy)}
+.ins-field-db{grid-column:1/-1}
+.ins-db-ref-row{display:flex;gap:4px;flex-wrap:wrap}
+.ins-db-ref-row select{flex:1;min-width:80px;padding:4px 6px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--tx);font:10px 'SF Mono',monospace;outline:none}
+.ins-db-ref-row select:focus{border-color:var(--cy);box-shadow:0 0 0 2px rgba(56,212,245,.12)}
+.dbq-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.dbq-sel{padding:2px 5px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--tx2);font:10px 'SF Mono',monospace;outline:none}
+.dbq-sel:focus{border-color:var(--cy)}
+.dbq-val{width:72px;padding:2px 5px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--or);font:10px 'SF Mono',monospace;outline:none}
+.dbq-preview-row{display:flex;align-items:flex-start;gap:6px;margin-top:2px}
+.dbq-preview{font:10px 'SF Mono',monospace;color:var(--ye);background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:3px 7px;word-break:break-all;flex:1}
+
+/* ── RIGHT COLUMN ───────────────────────────────────────────── */
+#right-col{width:380px;flex-shrink:0;background:var(--bg1);border-left:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
+.rtabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--bd);flex-shrink:0}
+.rtab{padding:8px 16px;font-size:11px;font-weight:600;color:var(--tx3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.rtab:hover{color:var(--tx2)}
+.rtab.active{color:var(--cy);border-bottom-color:var(--cy)}
+.rtab-actions{margin-left:auto;display:flex;align-items:center;padding-right:8px;gap:4px}
+
+.rpane{flex:1;overflow:auto;display:none;min-height:0}
+.rpane.active{display:block}
+
+/* Preview canvas */
+#prev-canvas{padding:16px;background:var(--bg);min-height:160px}
+[data-mid]{cursor:pointer}
+[data-mid].mc-hover{outline:1px dashed rgba(56,212,245,.5)!important;outline-offset:2px}
+[data-mid].mc-sel{outline:2px solid var(--cy)!important;outline-offset:2px;box-shadow:0 0 0 4px rgba(56,212,245,.08)!important}
+
+/* DOM tree pane */
+#dom-pane{padding:6px 5px;background:var(--bg)}
+.dom-node{display:flex;align-items:center;gap:4px;padding:3px 7px;cursor:pointer;border-radius:4px;margin-bottom:1px;position:relative;transition:background .1s;user-select:none}
+.dom-node::before{content:'';position:absolute;left:0;top:15%;height:70%;width:2px;border-radius:2px;background:transparent;transition:background .15s}
+.dom-node:hover{background:var(--bg3)}
+.dom-node.sel{background:var(--bg3)}
+.dom-node.sel::before{background:var(--cy)}
+.dom-exp{width:14px;font-size:9px;color:var(--tx3);flex-shrink:0;text-align:center;transition:transform .15s;line-height:1}
+.dom-exp.closed{transform:rotate(-90deg)}
+.dom-exp.leaf{opacity:0;pointer-events:none}
+.dom-angle{color:var(--tx3);font-size:10px}
+.dom-tag{color:var(--cy);font-size:10px;font-weight:700}
+.dom-mname{font-size:10px;color:var(--tx2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dom-val{font-size:9px;color:var(--or);max-width:72px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dom-hidden{font-size:9px;color:var(--tx3);border:1px solid var(--bd);border-radius:3px;padding:0 3px}
+.dom-has-dl{width:5px;height:5px;border-radius:50%;background:var(--gn);flex-shrink:0;box-shadow:0 0 4px var(--gn)}
+
+/* Bus log */
+#log-panel{height:150px;border-top:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
+.log-hd{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--bg2);border-bottom:1px solid var(--bd);font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase;flex-shrink:0}
+.log-hd button{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:11px}
+.log-hd button:hover{color:var(--rd)}
+#log-list{flex:1;overflow-y:auto;padding:2px 0}
+.log-entry{padding:3px 10px;font-size:10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(28,36,56,.5)}
+.log-entry:hover{background:var(--bg3)}
+.log-ts{color:var(--tx3);flex-shrink:0;font-size:9px}
+.log-type{color:var(--cy);font-weight:700;flex-shrink:0}
+.log-src{color:var(--tx2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log-val{color:var(--or);flex-shrink:0}
+
+/* ── STATUSBAR ──────────────────────────────────────────────── */
+#statusbar{height:24px;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--bg1);border-top:1px solid var(--bd);font-size:10px;color:var(--tx3);flex-shrink:0}
+.st-dot{width:5px;height:5px;border-radius:50%;background:var(--gn);box-shadow:0 0 4px var(--gn)}
+.st-sep{color:var(--bd2)}
+
+/* ── MODAL ──────────────────────────────────────────────────── */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center}
+#modal-overlay.open{display:flex}
+#modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--rll);width:400px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.6),0 0 0 1px rgba(56,212,245,.05)}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd);font-size:13px;font-weight:700;color:var(--tx);flex-shrink:0;background:var(--bg3)}
+.modal-hd button{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:18px;line-height:1;transition:color .15s}
+.modal-hd button:hover{color:var(--rd)}
+.modal-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1}
+.mf{display:flex;flex-direction:column;gap:4px}
+.mf label{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+.mf input,.mf select{padding:7px 10px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:12px 'SF Mono',monospace;outline:none;transition:border-color .15s,box-shadow .15s}
+.mf input:focus,.mf select:focus{border-color:var(--cy);box-shadow:0 0 0 2px rgba(56,212,245,.12)}
+.modal-footer{padding:12px 18px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--bd);flex-shrink:0}
+.tag-group-label{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;margin-top:6px;margin-bottom:3px;font-weight:700}
+.tag-btn-row{display:flex;flex-wrap:wrap;gap:3px}
+.tag-btn{padding:3px 8px;border-radius:4px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx2);font:11px 'SF Mono',monospace;cursor:pointer;transition:all .12s}
+.tag-btn:hover{border-color:var(--cy);color:var(--cy);background:rgba(56,212,245,.07)}
+.tag-btn.sel{border-color:var(--cy);background:var(--cy2);color:var(--cy)}
+
+/* ── PIPELINE ───────────────────────────────────────────────── */
+.pipeline{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-height:26px;padding:4px 0}
+.pipe-chip{display:inline-flex;align-items:center;gap:3px;padding:3px 8px 3px 9px;border-radius:10px;border:1px solid;font:10px 'SF Mono',monospace;font-weight:600;flex-shrink:0}
+.pipe-chip .chip-x{font-size:11px;line-height:1;margin-left:1px}
+.pipe-arrow{color:var(--tx3);font-size:9px;flex-shrink:0}
+.wiring-chip{font-size:9px;padding:2px 6px 2px 7px;border-color:var(--pu2);color:var(--pu)}
+.pipe-sel{padding:4px 6px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--tx);font:10px 'SF Mono',monospace;outline:none}
+.pipe-sel:focus{border-color:var(--cy)}
+.pipe-sel-sm{padding:2px 4px;border-radius:3px;border:1px solid var(--bd);background:var(--bg);color:var(--tx2);font:9px 'SF Mono',monospace;outline:none;max-width:90px}
+.pipe-add-sm{padding:2px 6px;border-radius:3px;border:1px solid var(--pu2);background:var(--pu2);color:var(--pu);font:9px 'SF Mono',monospace;cursor:pointer}
+.pipe-add-sm:hover{background:#3a2a70}
+
+/* ── STYLES / ATTRS EDITORS ─────────────────────────────────── */
+.sty-row,.attr-row{display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.sty-prop{flex:2;padding:4px 7px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--cy);font:11px 'SF Mono',monospace;outline:none;min-width:0}
+.sty-prop:focus{border-color:var(--cy);box-shadow:0 0 0 2px rgba(56,212,245,.1)}
+.sty-colon{color:var(--tx3);font-size:11px;flex-shrink:0}
+.sty-val{flex:3;padding:4px 7px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--or);font:11px 'SF Mono',monospace;outline:none;min-width:0}
+.sty-val:focus{border-color:var(--or);box-shadow:0 0 0 2px rgba(245,166,35,.1)}
+.sty-swatch{width:18px;height:18px;border-radius:3px;border:1px solid var(--bd2);flex-shrink:0;cursor:pointer;padding:0;background:transparent}
+.attr-key{flex:2;padding:4px 7px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--pu);font:11px 'SF Mono',monospace;outline:none;min-width:0}
+.attr-key:focus{border-color:var(--pu);box-shadow:0 0 0 2px rgba(167,139,250,.1)}
+.attr-val{flex:3;padding:4px 7px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--ye);font:11px 'SF Mono',monospace;outline:none;min-width:0}
+.attr-val:focus{border-color:var(--ye);box-shadow:0 0 0 2px rgba(255,216,77,.1)}
+
+/* ── EVENT REGISTRY ─────────────────────────────────────────── */
+.ev-card{border:1px solid var(--bd);border-left-width:3px;border-radius:var(--rl);background:var(--bg1);margin-bottom:6px;overflow:hidden}
+.ev-card-hd{display:flex;align-items:center;gap:7px;padding:7px 10px;border-bottom:1px solid var(--bd);background:rgba(255,255,255,.02)}
+.ev-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ev-card-body{padding:5px 10px;display:flex;flex-direction:column;gap:3px}
+.ev-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:10px;color:var(--tx3)}
+.ev-row .kw{flex-shrink:0}
+.reg-sel{padding:4px 6px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--tx);font:11px 'SF Mono',monospace;outline:none;min-width:0;flex:1}
+.reg-sel:focus{border-color:var(--cy)}
+.quick-ev-row{display:flex;align-items:center;gap:4px;padding:5px 0;border-top:1px dashed var(--bd2);margin-top:2px}
+.quick-ev-inp{flex:1;padding:4px 7px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--pu);font:11px 'SF Mono',monospace;outline:none;min-width:0}
+.quick-ev-inp:focus{border-color:var(--pu)}
+.btn-reg{padding:4px 9px;border-radius:var(--r);border:1px solid var(--pu2);background:var(--pu2);color:var(--pu);font:11px 'SF Mono',monospace;cursor:pointer;flex-shrink:0;transition:background .15s}
+.btn-reg:hover{background:#3a2a70}
+
+/* ── VARIABLE STORE ────────────────────────────────────────────── */
+.var-row{display:flex;align-items:center;gap:5px;padding:5px 0;border-bottom:1px solid var(--bd)}
+.var-name{flex:2;font-size:11px;color:var(--pk);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.var-val{flex:3;padding:3px 6px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--ye);font:11px 'SF Mono',monospace;outline:none;min-width:0}
+.var-val:focus{border-color:var(--ye);box-shadow:0 0 0 2px rgba(255,216,77,.1)}
+.var-new-name{flex:2;padding:4px 7px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);color:var(--pk);font:11px 'SF Mono',monospace;outline:none;min-width:0}
+.var-new-name:focus{border-color:var(--pk);box-shadow:0 0 0 2px rgba(244,114,182,.1)}
+
+/* ── SCROLLBARS ─────────────────────────────────────────────── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--bd3)}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">Machine<span> Constant</span></div>
+  <div class="tb-sep"></div>
+  <button class="tb-btn primary" onclick="openAddModal()">+ Machine</button>
+  <button class="tb-btn" onclick="exportJSON()">&#8595; Export</button>
+  <button class="tb-btn" onclick="importJSON()">&#8593; Import</button>
+  <button class="tb-btn" onclick="deployHTML()">&#11041; Deploy</button>
+  <button class="tb-btn danger" onclick="clearAll()">&#10005; Clear</button>
+  <div class="bus-pill">
+    <div class="bus-dot" id="bus-dot"></div>
+    <span id="bus-count">0 events</span>
+  </div>
+</div>
+
+<div id="app">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="panel-hd">
+      <span class="panel-hd-label">Components</span>
+      <button class="panel-hd-btn" onclick="openAddModal()" title="Add machine">+</button>
+    </div>
+    <div id="tree"></div>
+  </div>
+
+  <!-- INSPECTOR -->
+  <div id="inspector">
+    <div class="ins-empty" id="ins-empty">
+      <div class="ins-empty-icon">&#11041;</div>
+      <div class="ins-empty-h">No machine selected</div>
+      <div class="ins-empty-s">Click a component in the tree</div>
+    </div>
+    <div id="ins-body" style="display:none;flex-direction:column"></div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div id="right-col">
+    <div class="rtabs">
+      <button class="rtab active" id="tab-preview" onclick="switchTab('preview')">Preview</button>
+      <button class="rtab" id="tab-dom" onclick="switchTab('dom')">DOM Tree</button>
+      <button class="rtab" id="tab-events" onclick="switchTab('events')">Events</button>
+      <button class="rtab" id="tab-vars"   onclick="switchTab('vars')">Vars</button>
+      <button class="rtab" id="tab-db"     onclick="switchTab('db')">DB</button>
+      <div class="rtab-actions">
+        <button class="tb-btn" style="padding:3px 8px;font-size:10px" onclick="buildPreview()">&#8635;</button>
+      </div>
+    </div>
+
+    <div class="rpane active" id="rpane-preview">
+      <div id="prev-canvas"></div>
+    </div>
+    <div class="rpane" id="rpane-dom">
+      <div id="dom-pane"></div>
+    </div>
+    <div class="rpane" id="rpane-vars">
+      <div id="var-pane" style="padding:10px"></div>
+    </div>
+    <div class="rpane" id="rpane-events">
+      <div id="ev-registry-pane" style="padding:10px"></div>
+    </div>
+    <div class="rpane" id="rpane-db">
+      <div id="db-pane" style="height:100%;overflow:hidden"></div>
+    </div>
+
+    <div id="log-panel">
+      <div class="log-hd">
+        Bus Log
+        <button onclick="clearLog()">&#10005;</button>
+      </div>
+      <div id="log-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="statusbar">
+  <div class="st-dot"></div>
+  <span id="st-msg">Ready</span>
+  <span class="st-sep">|</span>
+  <span id="st-machines">0 machines</span>
+  <span class="st-sep">|</span>
+  <span id="st-events">0 events</span>
+</div>
+
+<!-- ADD MODAL -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="modal-hd">Add Machine <button onclick="closeModal()">&#215;</button></div>
+    <div class="modal-body">
+      <div class="mf"><label>Name</label><input id="m-name" placeholder="e.g. Button"></div>
+      <div class="mf"><label>Parent</label><select id="m-parent"><option value="">(root)</option></select></div>
+      <div class="mf">
+        <label>HTML Tag</label>
+        <div id="tag-groups"></div>
+        <input type="hidden" id="m-tag" value="div">
+      </div>
+      <div class="mf"><label>Initial Data</label><input id="m-data" placeholder="text content / value"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="tb-btn" onclick="closeModal()">Cancel</button>
+      <button class="tb-btn primary" onclick="confirmAdd()">Add Machine</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const DEPTH_COLORS = ['#38d4f5','#a78bfa','#2dd88a','#f5a623','#f472b6','#ffd84d','#60a5fa'];
+const OPS         = ['set','append','clear','increment','toggle','show','hide','emit'];
+const VOID_TAGS   = new Set(['input','br','hr','img','meta','link','area','base','col','embed','param','source','track','wbr']);
+const TAG_GROUPS  = {
+  Layout: ['div','section','article','aside','header','footer','nav','main','span'],
+  Text:   ['h1','h2','h3','h4','p','blockquote','pre','code','strong','em','label','a'],
+  Form:   ['button','input','select','textarea','form','fieldset'],
+  List:   ['ul','ol','li','table','tr','td','th'],
+};
+const DOM_EVENTS = ['click','input','change','submit','keydown','keyup','focus','blur','mouseover','mouseout','dblclick'];
+const PRESET_GROUPS = {
+  String:  ['toUpperCase','toLowerCase','trim','reverse','wrapQuotes','wrapParens'],
+  Split:   ['words','chars','lines'],
+  Array:   ['length','first','last','join','stringify'],
+  Number:  ['toNumber','increment','decrement','double','round','floor','abs'],
+  Logic:   ['toBoolean','not','isEmpty'],
+  Parse:   ['json','date','time'],
+};
+const PRESETS = {
+  toUpperCase: v => String(v).toUpperCase(),
+  toLowerCase: v => String(v).toLowerCase(),
+  trim:        v => String(v).trim(),
+  reverse:     v => Array.isArray(v) ? [...v].reverse() : String(v).split('').reverse().join(''),
+  wrapQuotes:  v => `"${v}"`,
+  wrapParens:  v => `(${v})`,
+  words:       v => String(v).trim().split(/\s+/).filter(Boolean),
+  chars:       v => String(v).split(''),
+  lines:       v => String(v).split('\n'),
+  length:      v => Array.isArray(v) ? v.length : String(v).length,
+  first:       v => Array.isArray(v) ? (v[0] ?? '') : (String(v)[0] ?? ''),
+  last:        v => Array.isArray(v) ? (v[v.length-1] ?? '') : String(v).slice(-1),
+  join:        v => Array.isArray(v) ? v.join(' ') : String(v),
+  stringify:   v => JSON.stringify(v),
+  toNumber:    v => Number(v),
+  increment:   v => (parseFloat(v) || 0) + 1,
+  decrement:   v => (parseFloat(v) || 0) - 1,
+  double:      v => (parseFloat(v) || 0) * 2,
+  round:       v => Math.round(parseFloat(v) || 0),
+  floor:       v => Math.floor(parseFloat(v) || 0),
+  abs:         v => Math.abs(parseFloat(v) || 0),
+  toBoolean:   v => !!v,
+  not:         v => !v,
+  isEmpty:     v => Array.isArray(v) ? v.length === 0 : String(v).trim() === '',
+  json:        v => { try { return JSON.parse(String(v)); } catch(_) { return v; } },
+  date:        _  => new Date().toLocaleDateString(),
+  time:        _  => new Date().toLocaleTimeString(),
+};
+
+const CSS_PROPS  = ['color','background','background-color','background-image','border','border-color','border-radius','border-width','border-style','box-shadow','opacity','display','flex','flex-direction','flex-wrap','align-items','justify-content','gap','grid-template-columns','grid-template-rows','width','height','min-width','min-height','max-width','max-height','padding','padding-top','padding-right','padding-bottom','padding-left','margin','margin-top','margin-right','margin-bottom','margin-left','font-size','font-weight','font-family','font-style','line-height','letter-spacing','text-align','text-decoration','text-transform','text-overflow','white-space','overflow','overflow-x','overflow-y','position','top','right','bottom','left','z-index','transform','transition','cursor','pointer-events','user-select','list-style','outline','resize'];
+const HTML_ATTRS = ['id','class','href','src','alt','title','placeholder','type','name','value','checked','disabled','readonly','required','multiple','accept','action','method','target','rel','role','aria-label','aria-hidden','aria-disabled','tabindex','draggable','data-','style','lang','dir','for','colspan','rowspan','width','height','autoplay','controls','loop','muted','preload'];
+
+// ── BUS ───────────────────────────────────────────────────────────────────────
+const Bus = (() => {
+  const subs = {}; let total = 0;
+  return {
+    on(t, fn)  { (subs[t] = subs[t] || []).push(fn); },
+    off(t, fn) { if (subs[t]) subs[t] = subs[t].filter(f => f !== fn); },
+    emit(ev) {
+      ev.ts = Date.now(); total++;
+      [...(subs[ev.type]||[])].forEach(h => { try { h(ev); } catch(e) {} });
+      [...(subs['*']    ||[])].forEach(h => { try { h(ev); } catch(e) {} });
+      appendLog(ev); pulseBusDot();
+      gid('bus-count').textContent = total + (total===1?' event':' events');
+      gid('st-events').textContent = total + ' events';
+    },
+    total: () => total,
+    reset() { total = 0; },
+  };
+})();
+
+// ── PIPELINE ──────────────────────────────────────────────────────────────────
+function runPipeline(value, instructions) {
+  if (!instructions || !instructions.length) return value;
+  return instructions.reduce((v, inst) => {
+    const fn = PRESETS[inst.preset]; return fn ? fn(v) : v;
+  }, value);
+}
+function pipeToStr(v) {
+  if (Array.isArray(v)) return v.join(', ');
+  if (v == null) return '';
+  return String(v);
+}
+
+// ── IDs ───────────────────────────────────────────────────────────────────────
+let _mid = 1, _iid = 1;
+const mkId  = () => 'M' + String(_mid++).padStart(3,'0');
+const mkIid = () => 'I' + String(_iid++).padStart(4,'0');
+
+// ── MACHINE ───────────────────────────────────────────────────────────────────
+class Machine {
+  constructor(cfg = {}) {
+    this.id           = cfg.id    || mkId();
+    this.name         = cfg.name  || 'Machine';
+    this.tag          = cfg.tag   || 'div';
+    this.data         = cfg.data  != null ? String(cfg.data) : '';
+    this.hidden       = !!cfg.hidden;
+    this.layout       = cfg.layout || '';
+    this.parentId     = cfg.parentId  || null;
+    this.childIds     = cfg.childIds  ? [...cfg.childIds] : [];
+    this.domListeners       = cfg.domListeners ? cfg.domListeners.map(d => ({...d})) : [];
+    this.styles             = cfg.styles ? {...cfg.styles} : {};
+    this.attrs              = cfg.attrs  ? {...cfg.attrs}  : {};
+    this.inputinstructions  = cfg.inputinstructions  ? cfg.inputinstructions.map(i => ({...i}))  : [];
+    this.outputinstructions = cfg.outputinstructions ? cfg.outputinstructions.map(i => ({...i})) : [];
+    this.source             = cfg.source     || '';
+    this.dbRef              = cfg.dbRef ? {...cfg.dbRef} : null;
+    this.dbQuery            = cfg.dbQuery    || null;
+    this.interactions = [];
+    this._handlers    = [];
+    if (cfg.interactions) cfg.interactions.forEach(ix => this._wire(ix));
+  }
+  _wire(ix) {
+    const fn = ev => {
+      if (ix.trigger.sourceId && ix.trigger.sourceId !== '*' && ev.sourceId !== ix.trigger.sourceId) return;
+      const piped = ix.instructions && ix.instructions.length ? runPipeline(ev.value, ix.instructions) : ev.value;
+      if (condCheck(piped, ix.condition)) {
+        ix.effects.forEach(fx => doEffect(fx, {...ev, value: piped}));
+      } else if (ix.elseEffects && ix.elseEffects.length) {
+        ix.elseEffects.forEach(fx => doEffect(fx, {...ev, value: piped}));
+      }
+    };
+    Bus.on(ix.trigger.type, fn);
+    this._handlers.push({ ixId: ix.id, type: ix.trigger.type, fn });
+    this.interactions.push(ix);
+  }
+  addInteraction(ix) { this._wire(ix); }
+  removeInteraction(ixId) {
+    const idx = this.interactions.findIndex(i => i.id === ixId);
+    if (idx < 0) return;
+    const h = this._handlers.find(h => h.ixId === ixId);
+    if (h) { Bus.off(h.type, h.fn); this._handlers = this._handlers.filter(x => x !== h); }
+    this.interactions.splice(idx, 1);
+  }
+  unmount() { this._handlers.forEach(h => Bus.off(h.type, h.fn)); this._handlers = []; this.interactions = []; }
+}
+
+// ── CONDITION / EFFECT ────────────────────────────────────────────────────────
+function condCheck(value, cond) {
+  if (!cond || cond.op === 'always') return true;
+  const sv = String(value ?? ''), nv = Number(value), cv = String(cond.value ?? '');
+  switch (cond.op) {
+    case 'truthy':     return !!value;
+    case 'falsy':      return !value;
+    case 'equals':     return sv === cv;
+    case 'not-equals': return sv !== cv;
+    case 'contains':   return sv.includes(cv);
+    case 'gt':         return nv > Number(cond.value);
+    case 'lt':         return nv < Number(cond.value);
+    default:           return true;
+  }
+}
+
+function doEffect(fx, ev) {
+  const m = machines.get(fx.targetId); if (!m) return;
+  const val = (fx.value != null && fx.value !== '') ? fx.value : (ev.value ?? '');
+  switch (fx.op) {
+    case 'set':       m.data   = String(val); break;
+    case 'append':    m.data   = (m.data||'') + String(val); break;
+    case 'clear':     m.data   = ''; break;
+    case 'increment': m.data   = String((parseFloat(m.data)||0) + (parseFloat(val)||1)); break;
+    case 'toggle':    m.hidden = !m.hidden; break;
+    case 'show':      m.hidden = false; break;
+    case 'hide':      m.hidden = true; break;
+    case 'emit':
+      Bus.emit({ type: String(val||'signal'), sourceId: fx.targetId, value: m.data });
+      return;
+  }
+  if (!['toggle','show','hide'].includes(fx.op) && m.inputinstructions && m.inputinstructions.length) {
+    m.data = pipeToStr(runPipeline(m.data, m.inputinstructions));
+  }
+  if (m.source    && !["toggle","show","hide"].includes(fx.op)) setVar(m.source, m.data);
+  if (m.dbRef && m.dbRef.field && !["toggle","show","hide"].includes(fx.op)) writeDBField(m.dbRef.collection, m.dbRef.docId, m.dbRef.field, m.data);
+  patchEl(fx.targetId);
+  if (selId === fx.targetId) refreshDataField();
+  renderDomTree();
+}
+
+// ── STORE ─────────────────────────────────────────────────────────────────────
+const machines      = new Map();
+const eventRegistry = new Set();
+let roots  = [];
+let selId  = null;
+const domCollapsed = new Set();
+const varStore     = new Map(); // name → value
+const dbStore      = new Map(); // collectionName → Map<docId, {_id, ...fields}>
+let dbSelCol        = '';          // currently selected collection in DB panel
+
+// ── CRUD ──────────────────────────────────────────────────────────────────────
+function addMachine(cfg, parentId) {
+  const m = new Machine(cfg);
+  machines.set(m.id, m);
+  if (parentId) {
+    const p = machines.get(parentId);
+    if (p) { m.parentId = parentId; p.childIds.push(m.id); }
+  } else { roots.push(m.id); }
+  renderTree(); buildPreview(); updateSt();
+  setStatus(m.name + ' added');
+  return m;
+}
+
+function removeMachine(id) {
+  const m = machines.get(id); if (!m) return;
+  m.childIds.slice().forEach(cid => removeMachine(cid));
+  m.unmount();
+  if (m.parentId) {
+    const p = machines.get(m.parentId);
+    if (p) p.childIds = p.childIds.filter(c => c !== id);
+  } else { roots = roots.filter(r => r !== id); }
+  machines.forEach(om => {
+    om.interactions.slice().forEach(ix => {
+      if (ix.effects.some(fx => fx.targetId === id)) om.removeInteraction(ix.id);
+    });
+  });
+  machines.delete(id);
+  if (selId === id) { selId = null; renderInspector(); }
+  renderTree(); buildPreview(); updateSt();
+}
+
+function selectMachine(id) {
+  selId = id;
+  renderTree();
+  renderInspector();
+  syncPreviewSel();
+  renderDomTree();
+}
+
+// ── COLOR ─────────────────────────────────────────────────────────────────────
+function depthOf(id) {
+  let d = 0, m = machines.get(id);
+  while (m && m.parentId) { d++; m = machines.get(m.parentId); }
+  return d;
+}
+function colorOf(id)       { return DEPTH_COLORS[depthOf(id) % DEPTH_COLORS.length]; }
+function colorForEvent(ev) {
+  let h = 0;
+  for (let i = 0; i < ev.length; i++) h = (h * 31 + ev.charCodeAt(i)) | 0;
+  return DEPTH_COLORS[Math.abs(h) % DEPTH_COLORS.length];
+}
+
+// ── EVENT REGISTRY ────────────────────────────────────────────────────────────
+function registerEvent(type) {
+  if (!type || !type.trim()) return;
+  eventRegistry.add(type.trim());
+  renderEventRegistry();
+}
+
+function unregisterEvent(type) {
+  eventRegistry.delete(type);
+  renderEventRegistry();
+  setStatus('Event "' + type + '" removed from registry');
+}
+
+function addRegistryEvent() {
+  const inp = gid('new-ev-inp');
+  const name = inp?.value.trim();
+  if (!name) { setStatus('Enter an event name'); return; }
+  registerEvent(name);
+  if (inp) inp.value = '';
+  setStatus('Event "' + name + '" registered');
+}
+
+function quickRegisterEvent(inputId) {
+  const inp = gid(inputId);
+  const name = inp?.value.trim();
+  if (!name) return;
+  registerEvent(name);
+  if (inp) inp.value = '';
+  renderInspector();
+  setStatus('Event "' + name + '" registered');
+}
+
+function registryEventOpts(selected) {
+  const sorted = [...eventRegistry].sort();
+  let opts = '<option value="">— pick event —</option>';
+  if (selected && !eventRegistry.has(selected)) {
+    opts += `<option value="${esc(selected)}" selected>${esc(selected)}</option>`;
+  }
+  opts += sorted.map(ev =>
+    `<option value="${esc(ev)}"${ev === selected ? ' selected' : ''}>${esc(ev)}</option>`
+  ).join('');
+  return opts;
+}
+
+function renderEventRegistry() {
+  const pane = gid('ev-registry-pane'); if (!pane) return;
+  const events = [...eventRegistry].sort();
+
+  const firers  = {};
+  const reactors = {};
+  machines.forEach(m => {
+    m.domListeners.forEach(dl => {
+      if (!dl.fires) return;
+      (firers[dl.fires] = firers[dl.fires] || []).push(m.name);
+    });
+    m.interactions.forEach(ix => {
+      const t = ix.trigger.type; if (!t) return;
+      (reactors[t] = reactors[t] || []).push(m.name);
+    });
+  });
+
+  const cards = events.map(ev => {
+    const color = colorForEvent(ev);
+    const rgb   = hexToRgb(color);
+    const fireChips  = (firers[ev]   || []).map(n => `<span class="chip-ev"  style="font-size:9px;padding:1px 5px;background:rgba(${rgb},.12);color:${color}">${esc(n)}</span>`).join(' ');
+    const reactChips = (reactors[ev] || []).map(n => `<span class="chip-op" style="font-size:9px;padding:1px 5px">${esc(n)}</span>`).join(' ');
+    return `<div class="ev-card" style="border-left-color:${color}">
+      <div class="ev-card-hd">
+        <span class="ev-dot" style="background:${color};box-shadow:0 0 5px ${color}"></span>
+        <span class="chip-ev" style="background:rgba(${rgb},.15);color:${color}">${esc(ev)}</span>
+        <button class="rx-rm-all" onclick="unregisterEvent('${esc(ev)}')">&#215; remove</button>
+      </div>
+      <div class="ev-card-body">
+        ${fireChips  ? `<div class="ev-row"><span class="kw">emits:</span>${fireChips}</div>`   : ''}
+        ${reactChips ? `<div class="ev-row"><span class="kw">reacts:</span>${reactChips}</div>` : ''}
+        ${!fireChips && !reactChips ? '<div style="font-size:10px;color:var(--tx3)">unused</div>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  pane.innerHTML = `
+    <div style="font-size:10px;color:var(--tx3);margin-bottom:8px;font-weight:700;letter-spacing:.07em;text-transform:uppercase">${events.length} registered event${events.length !== 1 ? 's' : ''}</div>
+    ${cards || '<div style="font-size:11px;color:var(--tx3);padding:8px 0">No events registered yet</div>'}
+    <div class="add-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)">
+      <input id="new-ev-inp" class="quick-ev-inp" style="flex:1" placeholder="event name…" onkeydown="if(event.key==='Enter')addRegistryEvent()">
+      <button class="btn-reg" onclick="addRegistryEvent()">+ Register</button>
+    </div>`;
+}
+
+function scanAndRegisterEvents() {
+  machines.forEach(m => {
+    m.domListeners.forEach(dl => { if (dl.fires) registerEvent(dl.fires); });
+    m.interactions.forEach(ix => { if (ix.trigger.type) registerEvent(ix.trigger.type); });
+  });
+}
+
+// ── VARIABLE STORE ─────────────────────────────────────────────────────────────────────────────────
+function addVar() {
+  const nameEl = gid('new-var-name'), valEl = gid('new-var-val');
+  const name = nameEl?.value.trim();
+  if (!name) { setStatus('Enter a variable name'); return; }
+  const val = valEl?.value ?? '';
+  varStore.set(name, String(val));
+  if (nameEl) nameEl.value = '';
+  if (valEl)  valEl.value  = '';
+  renderVarPanel(); renderInspector(); setStatus('Variable ' + name + ' added');
+}
+
+function removeVar(name) {
+  varStore.delete(name);
+  machines.forEach(m => { if (m.source === name) m.source = ''; });
+  renderVarPanel(); renderInspector(); setStatus('Variable ' + name + ' removed');
+}
+
+function setVar(name, val) {
+  varStore.set(name, String(val));
+  machines.forEach(m => {
+    if (m.source === name) {
+      m.data = String(val);
+      patchEl(m.id);
+      if (selId === m.id) refreshDataField();
+    }
+  });
+  renderDomTree();
+}
+
+function changeSource(id, varName) {
+  const m = machines.get(id); if (!m) return;
+  m.source = varName;
+  if (varName && varStore.has(varName)) {
+    m.data = String(varStore.get(varName));
+    patchEl(id);
+    if (selId === id) refreshDataField();
+  }
+  setStatus(varName ? ('Bound to ' + varName) : 'Source cleared');
+}
+
+function mkDocId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+function getCollectionFields(col) {
+  const fields = new Set();
+  col.forEach(doc => Object.keys(doc).forEach(k => { if (k !== '_id') fields.add(k); }));
+  return [...fields].sort();
+}
+function renderDBRefFields(m, sid) {
+  const ref = m.dbRef || { collection: '', docId: '', field: '' };
+  const cols = [...dbStore.keys()];
+  let colOpts = '<option value="">— none —</option>';
+  cols.forEach(c => {
+    const e = esc(c);
+    colOpts += '<option value="' + e + '"' + (ref.collection === c ? ' selected' : '') + '>' + e + '</option>';
+  });
+  const col = dbStore.get(ref.collection);
+  let docOpts = '<option value="">— doc —</option>';
+  if (col) {
+    col.forEach((doc, docId) => {
+      const e = esc(docId);
+      docOpts += '<option value="' + e + '"' + (ref.docId === docId ? ' selected' : '') + '>' + e.slice(0,10) + '</option>';
+    });
+  }
+  const fields = (col && ref.docId) ? getCollectionFields(col) : [];
+  let fldOpts = '<option value="">— field —</option>';
+  fields.forEach(f => {
+    const e = esc(f);
+    fldOpts += '<option value="' + e + '"' + (ref.field === f ? ' selected' : '') + '>' + e + '</option>';
+  });
+  const rc = esc(ref.collection), rd = esc(ref.docId);
+  return '<div class="ins-field ins-field-db">' +
+    '<span class="ins-field-label">DB Ref</span>' +
+    '<div class="ins-db-ref-row">' +
+    '<select onchange="changeDBRef(&quot;' + sid + '&quot;,this.value,&quot;&quot;,&quot;&quot;)">' + colOpts + '</select>' +
+    '<select onchange="changeDBRef(&quot;' + sid + '&quot;,&quot;' + rc + '&quot;,this.value,&quot;&quot;)">' + docOpts + '</select>' +
+    '<select onchange="changeDBRef(&quot;' + sid + '&quot;,&quot;' + rc + '&quot;,&quot;' + rd + '&quot;,this.value)">' + fldOpts + '</select>' +
+    '</div>' +
+    '</div>';
+}
+function renderDBQuerySection(m, sid) {
+  const dq = m.dbQuery || { collection: '', filterField: '', filterOp: 'any', filterVal: '', projectField: '', display: 'values' };
+  const active = !!m.dbQuery;
+  const cols = [...dbStore.keys()];
+  let colOpts = '<option value="">— collection —</option>';
+  cols.forEach(c => {
+    const e = esc(c);
+    colOpts += '<option value="' + e + '"' + (dq.collection === c ? ' selected' : '') + '>' + e + '</option>';
+  });
+  const qCol = dbStore.get(dq.collection);
+  const qFields = qCol ? getCollectionFields(qCol) : [];
+  let fieldOpts = '<option value="">— field —</option>';
+  let projOpts  = '<option value="">— field —</option>';
+  qFields.forEach(f => {
+    const e = esc(f);
+    fieldOpts += '<option value="' + e + '"' + (dq.filterField  === f ? ' selected' : '') + '>' + e + '</option>';
+    projOpts  += '<option value="' + e + '"' + (dq.projectField === f ? ' selected' : '') + '>' + e + '</option>';
+  });
+  const opSel = function(v, lbl) { return '<option value="' + v + '"' + (dq.filterOp === v ? ' selected' : '') + '>' + lbl + '</option>'; };
+  const valInp = dq.filterOp !== 'any' ? '<input class="dbq-val" value="' + esc(dq.filterVal) + '" placeholder="value…" onchange="setDbQueryFilter(&quot;' + sid + '&quot;,&quot;val&quot;,this.value)">' : '';
+  const clrBtn = active ? '<button class="chip-x" style="flex-shrink:0" onclick="clearDbQuery(&quot;' + sid + '&quot;)">&#215; clear</button>' : '';
+  const preview = active ? '<div class="dbq-preview-row"><span class="chip-kw">result</span><span class="dbq-preview">' + esc(runDbQuery(m)) + '</span></div>' : '';
+  return '<div class="ins-section" id="sec-dbq">' +
+    '<div class="sec-hd collapsed" onclick="toggleSec(\'sec-dbq\')">' +
+    '<span class="sec-toggle">&#9660;</span>' +
+    '<span class="sec-label">DB Query</span>' +
+    '<span class="sec-count">' + (active ? '&#10003; active' : '') + '</span>' +
+    '</div>' +
+    '<div class="sec-body collapsed">' +
+    '<div class="dbq-row">' +
+    '<span class="chip-kw" style="flex-shrink:0">from</span>' +
+    '<select class="dbq-sel" onchange="setDbQueryFilter(&quot;' + sid + '&quot;,&quot;collection&quot;,this.value)">' + colOpts + '</select>' +
+    '</div>' +
+    '<div class="dbq-row">' +
+    '<span class="chip-kw" style="flex-shrink:0">filter</span>' +
+    '<select class="dbq-sel" onchange="setDbQueryFilter(&quot;' + sid + '&quot;,&quot;field&quot;,this.value)">' + fieldOpts + '</select>' +
+    '<select class="dbq-sel" onchange="setDbQueryFilter(&quot;' + sid + '&quot;,&quot;op&quot;,this.value)">' +
+    opSel('any','any') + opSel('contains','contains') + opSel('startsWith','starts with') +
+    opSel('endsWith','ends with') + opSel('equals','equals') + opSel('not-equals','not equals') +
+    opSel('gt','>') + opSel('lt','<') +
+    '</select>' +
+    valInp +
+    '</div>' +
+    '<div class="dbq-row">' +
+    '<span class="chip-kw" style="flex-shrink:0">project</span>' +
+    '<select class="dbq-sel" onchange="setDbQueryFilter(&quot;' + sid + '&quot;,&quot;project&quot;,this.value)">' + projOpts + '</select>' +
+    '<select class="dbq-sel" onchange="setDbQueryFilter(&quot;' + sid + '&quot;,&quot;display&quot;,this.value)">' +
+    '<option value="values"' + (dq.display === 'values' ? ' selected' : '') + '>values</option>' +
+    '<option value="count"'  + (dq.display === 'count'  ? ' selected' : '') + '>count</option>' +
+    '<option value="first"'  + (dq.display === 'first'  ? ' selected' : '') + '>first value</option>' +
+    '<option value="json"'   + (dq.display === 'json'   ? ' selected' : '') + '>JSON</option>' +
+    '</select>' +
+    clrBtn +
+    '</div>' +
+    preview +
+    '</div>' +
+    '</div>';
+}
+function writeDBField(collection, docId, field, value) {
+  const col = dbStore.get(collection); if (!col) return;
+  const doc = col.get(docId); if (!doc) return;
+  doc[field] = String(value);
+  machines.forEach(m => {
+    if (m.dbRef && m.dbRef.collection === collection && m.dbRef.docId === docId && m.dbRef.field === field) {
+      m.data = String(value); patchEl(m.id);
+      if (selId === m.id) refreshDataField();
+    }
+  });
+  machines.forEach(m => { if (m.dbQuery) applyDbQuery(m); });
+  renderDomTree(); renderDBPanel();
+}
+function addCollection(name) {
+  if (!name) { setStatus('Enter a collection name'); return; }
+  if (dbStore.has(name)) { setStatus('Collection already exists'); return; }
+  dbStore.set(name, new Map());
+  dbSelCol = name;
+  renderDBPanel(); renderInspector(); setStatus('Collection added: ' + name);
+}
+function removeCollection(name) {
+  dbStore.delete(name);
+  machines.forEach(m => { if (m.dbRef && m.dbRef.collection === name) { m.dbRef = null; m.data = ''; patchEl(m.id); } });
+  machines.forEach(m => { if (m.dbQuery && m.dbQuery.collection === name) { m.dbQuery = null; m.data = ''; patchEl(m.id); } });
+  if (dbSelCol === name) dbSelCol = [...dbStore.keys()][0] || '';
+  renderDBPanel(); renderInspector(); setStatus('Collection removed: ' + name);
+}
+function selectDBCollection(name) { dbSelCol = name; renderDBPanel(); }
+function addDocument(col) {
+  const c = dbStore.get(col); if (!c) return;
+  const id = mkDocId();
+  const doc = { _id: id };
+  getCollectionFields(c).forEach(f => { doc[f] = ''; });
+  c.set(id, doc);
+  machines.forEach(m => { if (m.dbQuery && m.dbQuery.collection === col) applyDbQuery(m); });
+  renderDBPanel(); setStatus('Document added');
+}
+function removeDocument(col, docId) {
+  const c = dbStore.get(col); if (!c) return;
+  c.delete(docId);
+  machines.forEach(m => { if (m.dbRef && m.dbRef.collection === col && m.dbRef.docId === docId) { m.dbRef = null; m.data = ''; patchEl(m.id); } });
+  machines.forEach(m => { if (m.dbQuery && m.dbQuery.collection === col) applyDbQuery(m); });
+  renderDBPanel(); renderInspector(); setStatus('Document removed');
+}
+function addField(col, fieldName) {
+  const c = dbStore.get(col); if (!c) return;
+  fieldName = fieldName.trim(); if (!fieldName || fieldName === '_id') { setStatus('Invalid field name'); return; }
+  c.forEach(doc => { if (doc[fieldName] === undefined) doc[fieldName] = ''; });
+  renderDBPanel(); renderInspector(); setStatus('Field added: ' + fieldName);
+}
+function addFieldFromInput(col, inputId) {
+  const inp = gid(inputId); if (!inp) return;
+  addField(col, inp.value); inp.value = '';
+}
+function addCollFromInput(inputId) {
+  const inp = gid(inputId); if (!inp) return;
+  addCollection(inp.value.trim()); inp.value = '';
+}
+function changeDBRef(id, col, docId, field) {
+  const m = machines.get(id); if (!m) return;
+  if (!col) { m.dbRef = null; setStatus('DB ref cleared'); }
+  else {
+    m.dbRef = { collection: col, docId: docId || '', field: field || '' };
+    if (col && docId && field) {
+      const c = dbStore.get(col);
+      const doc = c && c.get(docId);
+      if (doc && doc[field] != null) { m.data = String(doc[field]); patchEl(id); if (selId === id) refreshDataField(); }
+    }
+    setStatus('DB: ' + col + '/' + docId + (field ? '.' + field : ''));
+  }
+  renderInspector();
+}
+function runDbQuery(m) {
+  if (!m.dbQuery) return '';
+  const { collection, filterField, filterOp, filterVal, projectField, display } = m.dbQuery;
+  const col = dbStore.get(collection); if (!col) return '';
+  const results = [];
+  col.forEach(doc => {
+    const fv = doc[filterField];
+    let ok = false;
+    if      (filterOp === 'any')        ok = true;
+    else if (filterOp === 'contains')   ok = String(fv||'').includes(filterVal);
+    else if (filterOp === 'startsWith') ok = String(fv||'').startsWith(filterVal);
+    else if (filterOp === 'endsWith')   ok = String(fv||'').endsWith(filterVal);
+    else if (filterOp === 'equals')     ok = String(fv||'') === String(filterVal);
+    else if (filterOp === 'not-equals') ok = String(fv||'') !== String(filterVal);
+    else if (filterOp === 'gt')         ok = Number(fv||0)  >  Number(filterVal);
+    else if (filterOp === 'lt')         ok = Number(fv||0)  <  Number(filterVal);
+    if (ok) results.push(doc);
+  });
+  const pf = projectField || '';
+  switch (display) {
+    case 'count':  return String(results.length);
+    case 'first':  return results.length ? String(results[0][pf] ?? '') : '';
+    case 'json':   return JSON.stringify(pf ? results.map(d => d[pf]) : results.map(d => { const o = {...d}; delete o._id; return o; }));
+    default:       return results.map(d => String(d[pf] ?? '')).join(', ');
+  }
+}
+function applyDbQuery(m) {
+  if (!m.dbQuery) return;
+  m.data = runDbQuery(m); patchEl(m.id);
+  if (selId === m.id) refreshDataField();
+}
+function setDbQueryFilter(mId, key, val) {
+  const m = machines.get(mId); if (!m) return;
+  if (!m.dbQuery) m.dbQuery = { collection: '', filterField: '', filterOp: 'any', filterVal: '', projectField: '', display: 'values' };
+  const km = { collection: 'collection', field: 'filterField', op: 'filterOp', val: 'filterVal', project: 'projectField', display: 'display' };
+  m.dbQuery[km[key] || key] = val;
+  applyDbQuery(m);
+  if (key !== 'val') renderInspector();
+}
+function clearDbQuery(mId) {
+  const m = machines.get(mId); if (!m) return;
+  m.dbQuery = null; m.data = ''; patchEl(m.id);
+  renderInspector(); setStatus('DB query cleared');
+}
+function renderDBPanel() {
+  const pane = gid('db-pane'); if (!pane) return;
+  const cols = [...dbStore.keys()];
+  if (!dbSelCol && cols.length) dbSelCol = cols[0];
+  let colList = '';
+  cols.forEach(name => {
+    const n = esc(name);
+    colList += '<div class="db-col-item' + (name === dbSelCol ? ' active' : '') + '" onclick="selectDBCollection(&quot;' + n + '&quot;)">' +
+      '<span class="db-col-name">' + n + '</span>' +
+      '<button class="btn-rm" onclick="event.stopPropagation();removeCollection(&quot;' + n + '&quot;)">&#215;</button>' +
+      '</div>';
+  });
+  let docArea = '';
+  if (dbSelCol) {
+    const col = dbStore.get(dbSelCol);
+    if (col) {
+      const fields = getCollectionFields(col);
+      if (col.size > 0) {
+        const hdrCells = fields.map(f => '<th class="db-th">' + esc(f) + '</th>').join('');
+        let rows = '';
+        const cs = esc(dbSelCol);
+        col.forEach((doc, docId) => {
+          const dEsc = esc(docId);
+          const cells = fields.map(f => {
+            const v = esc(String(doc[f] ?? ''));
+            return '<td><input class="db-cell-inp" value="' + v + '" onchange="writeDBField(&quot;' + cs + '&quot;,&quot;' + dEsc + '&quot;,&quot;' + esc(f) + '&quot;,this.value)"></td>';
+          }).join('');
+          rows += '<tr><td class="db-doc-id" title="' + dEsc + '">' + dEsc.slice(0,8) + '…</td>' + cells +
+            '<td><button class="btn-rm" onclick="removeDocument(&quot;' + cs + '&quot;,&quot;' + dEsc + '&quot;)">&#215;</button></td></tr>';
+        });
+        docArea = '<div class="db-table-wrap"><table class="db-table"><thead><tr><th class="db-th db-doc-id-hd">_id</th>' + hdrCells + '<th></th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      } else {
+        docArea = '<div class="db-no-docs">No documents yet</div>';
+      }
+      docArea += '<div class="db-doc-actions">' +
+        '<button class="btn-add" onclick="addDocument(&quot;' + esc(dbSelCol) + '&quot;)">+ Doc</button>' +
+        '<input id="new-field-inp" class="db-new-inp" placeholder="field name…">' +
+        '<button class="btn-add" onclick="addFieldFromInput(&quot;' + esc(dbSelCol) + '&quot;,&quot;new-field-inp&quot;)">+ Field</button>' +
+        '</div>';
+    }
+  }
+  pane.innerHTML =
+    '<div class="db-layout">' +
+      '<div class="db-sidebar">' +
+        '<div class="db-sidebar-hd">Collections</div>' +
+        (colList || '<div class="db-no-cols">No collections</div>') +
+        '<div class="db-col-add-row">' +
+          '<input id="new-col-inp" class="db-new-inp" placeholder="name…" onkeydown="if(event.key===&quot;Enter&quot;)addCollFromInput(&quot;new-col-inp&quot;)">' +
+          '<button class="btn-add" onclick="addCollFromInput(&quot;new-col-inp&quot;)">+</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="db-content">' +
+        (dbSelCol ? docArea : '<div class="db-no-cols">Select a collection</div>') +
+      '</div>' +
+    '</div>';
+}
+
+function renderVarPanel() {
+  const pane = gid('var-pane'); if (!pane) return;
+  let rows = '';
+  varStore.forEach((val, name) => {
+    const n = esc(name), v = esc(String(val));
+    rows += '<div class="var-row">' +
+      '<span class="var-name">' + n + '</span>' +
+      '<input class="var-val" value="' + v + '" onchange="setVar(\'' + n + '\',this.value)">' +
+      '<button class="btn-rm" onclick="removeVar(\'' + n + '\')">&#215;</button>' +
+      '</div>';
+  });
+  const c = varStore.size;
+  pane.innerHTML =
+    '<div style="font-size:10px;color:var(--tx3);margin-bottom:8px;font-weight:700;letter-spacing:.07em;text-transform:uppercase">' + c + ' variable' + (c !== 1 ? 's' : '') + '</div>' +
+    (rows || '<div style="font-size:11px;color:var(--tx3);padding:8px 0">No variables yet</div>') +
+    '<div class="add-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)">' +
+    '<input id="new-var-name" class="var-new-name" placeholder="name…" onkeydown="if(event.key===\'Enter\')addVar()">' +
+    '<input id="new-var-val" class="sty-val" placeholder="value…" onkeydown="if(event.key===\'Enter\')addVar()">' +
+    '<button class="btn-add" onclick="addVar()">+ Add</button>' +
+    '</div>';
+}
+
+// ── TREE ──────────────────────────────────────────────────────────────────
+function renderTree() {
+
+  const el = gid('tree'); el.innerHTML = '';
+  function row(id, depth) {
+    const m = machines.get(id); if (!m) return;
+    const c   = colorOf(id);
+    const div = document.createElement('div');
+    div.className = 'tree-row' + (selId === id ? ' sel' : '');
+    div.style.paddingLeft = (8 + depth * 14) + 'px';
+    div.innerHTML =
+      `<div class="tree-dot" style="background:${c}"></div>` +
+      `<span class="tree-name">${esc(m.name)}</span>` +
+      `<span class="tree-tag">${m.tag}</span>` +
+      `<button class="tree-rm" onclick="event.stopPropagation();removeMachine('${id}')">&#215;</button>`;
+    div.onclick    = () => selectMachine(id);
+    div.onmouseenter = () => hoverPreview(id, true);
+    div.onmouseleave = () => hoverPreview(id, false);
+    el.appendChild(div);
+    m.childIds.forEach(cid => row(cid, depth + 1));
+  }
+  roots.forEach(id => row(id, 0));
+}
+
+// ── INSPECTOR ─────────────────────────────────────────────────────────────────
+function renderInspector() {
+  const empty = gid('ins-empty'), body = gid('ins-body');
+  if (!selId) { empty.style.display='flex'; body.style.display='none'; return; }
+  const m = machines.get(selId); if (!m) return;
+  empty.style.display = 'none';
+  body.style.display  = 'flex';
+  body.style.flexDirection = 'column';
+
+  const c   = colorOf(selId);
+  const dq = m.dbQuery || { filterField: 'address', filterOp: 'any', filterVal: '', display: 'values' };
+  const dlH = m.domListeners.map((dl, i) => `
+    <div class="dl-row">
+      <select onchange="updateDL('${selId}',${i},'on',this.value)">
+        ${DOM_EVENTS.map(e => `<option${dl.on===e?' selected':''}>${e}</option>`).join('')}
+      </select>
+      <span class="kw">fires</span>
+      <select class="reg-sel" onchange="updateDL('${selId}',${i},'fires',this.value)">
+        ${registryEventOpts(dl.fires)}
+      </select>
+      <button class="btn-rm" onclick="removeDL('${selId}',${i})">&#215;</button>
+    </div>`).join('');
+
+  body.innerHTML = `
+    <div class="ins-hd">
+      <div class="ins-hd-top">
+        <div class="ins-accent" style="background:${c}"></div>
+        <input class="ins-name-inp" id="ins-name" value="${esc(m.name)}" onchange="renameMachine('${selId}',this.value)">
+        <span class="ins-id">${selId}</span>
+      </div>
+      <div class="ins-fields">
+        <div class="ins-field">
+          <span class="ins-field-label">HTML Tag</span>
+          <select onchange="changeTag('${selId}',this.value)">${allTagOpts(m.tag)}</select>
+        </div>
+        <div class="ins-field">
+          <span class="ins-field-label">Data</span>
+          <input id="ins-data" value="${esc(m.data)}" onchange="changeData('${selId}',this.value)">
+        </div>
+        <div class="ins-field">
+          <span class="ins-field-label">Layout</span>
+          <select onchange="changeLayout('${selId}',this.value)">
+            <option value="">default</option>
+            ${['flex','grid','block','inline','inline-flex'].map(v=>`<option${m.layout===v?' selected':''}>${v}</option>`).join('')}
+          </select>
+        </div>
+        <div class="ins-field">
+          <span class="ins-field-label">Visibility</span>
+          <div class="ins-field-inline">
+            <input type="checkbox" id="ins-hidden" ${m.hidden?'checked':''} onchange="changeHidden('${selId}',this.checked)">
+            <label for="ins-hidden">Hidden</label>
+          </div>
+        </div>
+        <div class="ins-field">
+          <span class="ins-field-label">Source</span>
+          <select onchange="changeSource('${selId}',this.value)">
+            <option value="">— none —</option>
+            ${[...varStore.keys()].map(k => '<option value="'+esc(k)+'"'+(m.source===k?' selected':'')+'>'+esc(k)+'</option>').join('')}
+          </select>
+        </div>
+        ${renderDBRefFields(m, selId)}
+      </div>
+    </div>
+
+
+    ${renderDBQuerySection(m, selId)}
+
+    <div class="ins-section" id="sec-dl">
+      <div class="sec-hd open" onclick="toggleSec('sec-dl')">
+        <span class="sec-toggle">&#9660;</span>
+        <span class="sec-label">DOM Listeners</span>
+        <span class="sec-count">${m.domListeners.length}</span>
+      </div>
+      <div class="sec-body">
+        <div id="dl-list">${dlH || '<span style="font-size:10px;color:var(--tx3)">No listeners yet</span>'}</div>
+        <div class="add-row">
+          <select id="dl-on">${DOM_EVENTS.map(e=>`<option>${e}</option>`).join('')}</select>
+          <span class="kw">fires</span>
+          <select id="dl-fires" class="reg-sel">${registryEventOpts('')}</select>
+          <button class="btn-add" onclick="addDL('${selId}')">+ Add</button>
+        </div>
+        <div class="quick-ev-row">
+          <span class="kw" style="font-size:9px;flex-shrink:0">new event:</span>
+          <input id="dl-new-ev" class="quick-ev-inp" placeholder="register…" onkeydown="if(event.key==='Enter')quickRegisterEvent('dl-new-ev')">
+          <button class="btn-reg" onclick="quickRegisterEvent('dl-new-ev')">+ Ev</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ins-section" id="sec-rx">
+      <div class="sec-hd open" onclick="toggleSec('sec-rx')">
+        <span class="sec-toggle">&#9660;</span>
+        <span class="sec-label">Reactions</span>
+        <span class="sec-count">${m.interactions.length}</span>
+      </div>
+      <div class="sec-body">
+        ${renderRxSection(m)}
+      </div>
+    </div>
+
+    <div class="ins-section" id="sec-sty">
+      <div class="sec-hd open" onclick="toggleSec('sec-sty')">
+        <span class="sec-toggle">&#9660;</span>
+        <span class="sec-label">CSS Styles</span>
+        <span class="sec-count">${Object.keys(m.styles).length}</span>
+      </div>
+      <div class="sec-body">
+        ${renderStylesEditor(m)}
+      </div>
+    </div>
+
+    <div class="ins-section" id="sec-att">
+      <div class="sec-hd open" onclick="toggleSec('sec-att')">
+        <span class="sec-toggle">&#9660;</span>
+        <span class="sec-label">HTML Attributes</span>
+        <span class="sec-count">${Object.keys(m.attrs).length}</span>
+      </div>
+      <div class="sec-body">
+        ${renderAttrsEditor(m)}
+      </div>
+    </div>
+
+    <div class="ins-section" id="sec-in">
+      <div class="sec-hd open" onclick="toggleSec('sec-in')">
+        <span class="sec-toggle">&#9660;</span>
+        <span class="sec-label">Input Pipeline</span>
+        <span class="sec-count" style="color:var(--gn)">${m.inputinstructions.length}</span>
+      </div>
+      <div class="sec-body">
+        <div style="font-size:9px;color:var(--tx3);margin-bottom:4px">Transforms data <em>after</em> any effect writes to this machine</div>
+        ${renderPipelineEditor(m,'input')}
+      </div>
+    </div>
+
+    <div class="ins-section" id="sec-out">
+      <div class="sec-hd open" onclick="toggleSec('sec-out')">
+        <span class="sec-toggle">&#9660;</span>
+        <span class="sec-label">Output Pipeline</span>
+        <span class="sec-count" style="color:var(--or)">${m.outputinstructions.length}</span>
+      </div>
+      <div class="sec-body">
+        <div style="font-size:9px;color:var(--tx3);margin-bottom:4px">Transforms data <em>before</em> this machine emits a DOM event</div>
+        ${renderPipelineEditor(m,'output')}
+      </div>
+    </div>
+  `;
+
+  gid('sec-rx').querySelector('.sec-body').addEventListener('click', e => {
+    const rm = e.target.closest('.ix-rm');
+    if (rm) {
+      const src = machines.get(selId);
+      if (src) src.removeInteraction(rm.dataset.ixid);
+      renderInspector(); return;
+    }
+    const rmAll = e.target.closest('.rx-rm-all');
+    if (rmAll) {
+      const ev = rmAll.dataset.rmev;
+      const src = machines.get(selId);
+      if (src) src.interactions.filter(ix => ix.trigger.type === ev)
+                               .map(ix => ix.id)
+                               .forEach(id => src.removeInteraction(id));
+      renderInspector();
+    }
+  });
+}
+
+function toggleSec(id) {
+  const sec  = gid(id);
+  const hd   = sec.querySelector('.sec-hd');
+  const body = sec.querySelector('.sec-body');
+  const open = hd.classList.contains('open');
+  hd.classList.toggle('open', !open);
+  hd.classList.toggle('collapsed', open);
+  body.classList.toggle('collapsed', open);
+}
+
+function allTagOpts(cur) {
+  return Object.values(TAG_GROUPS).flat().map(t => `<option${t===cur?' selected':''}>${t}</option>`).join('');
+}
+
+// ── REACTIONS SECTION ─────────────────────────────────────────────────────────
+function renderRxSection(m) {
+  const evOrder = [], byEvent = {};
+  m.interactions.forEach(ix => {
+    const t = ix.trigger.type;
+    if (!byEvent[t]) { byEvent[t] = []; evOrder.push(t); }
+    byEvent[t].push(ix);
+  });
+
+  const cards = evOrder.map((evType, idx) => {
+    const ec  = colorForEvent(evType);
+    const COND_OPS = ['always','truthy','falsy','equals','not-equals','contains','gt','lt'];
+    const COND_NEEDS_VAL = new Set(['equals','not-equals','contains','gt','lt']);
+    const fxH = byEvent[evType].map(ix => {
+      const fx     = ix.effects[0];
+      const cond   = ix.condition || {op:'always'};
+      const isSelf = fx.targetId === m.id;
+      const tgt    = machines.get(fx.targetId);
+      const tc     = isSelf ? 'var(--tx2)' : (tgt ? colorOf(tgt.id) : 'var(--tx3)');
+      const label  = isSelf ? '(self)' : (tgt ? tgt.name : fx.targetId);
+      const tagB   = (!isSelf && tgt) ? `<span class="rx-tag-b">&lt;${tgt.tag}&gt;</span>` : '';
+      const instArr = ix.instructions || [];
+      const pipeChips = instArr.map((inst, pi) =>
+        `<span class="pipe-chip wiring-chip">${esc(inst.preset)}<button class="chip-x" onclick="removeWiringPreset('${m.id}','${ix.id}',${pi})">&#215;</button></span>`
+      ).join('<span class="pipe-arrow">&#9658;</span>');
+      const condOpts = COND_OPS.map(o => `<option value="${o}"${cond.op===o?' selected':''}>${o}</option>`).join('');
+      const condValInp = COND_NEEDS_VAL.has(cond.op)
+        ? `<input class="cond-val-inp" value="${esc(cond.value||'')}" placeholder="value" onchange="updateCondVal('${m.id}','${ix.id}',this.value)">`
+        : '';
+      const elseEffects = ix.elseEffects || [];
+      let elseRow = '';
+      if (elseEffects.length) {
+        const efx   = elseEffects[0];
+        const eTgt  = machines.get(efx.targetId);
+        const eSelf = efx.targetId === m.id;
+        const eLabel = eSelf ? '(self)' : (eTgt ? eTgt.name : efx.targetId);
+        const eColor = eSelf ? 'var(--tx2)' : (eTgt ? colorOf(eTgt.id) : 'var(--tx3)');
+        const eTagB  = (!eSelf && eTgt) ? `<span class="rx-tag-b">&lt;${eTgt.tag}&gt;</span>` : '';
+        elseRow = `<div class="rx-else-row">
+          <span class="chip-kw">else &#8594;</span>
+          <span class="rx-tname" style="color:${eColor}">${esc(eLabel)}</span>${eTagB}
+          <span class="chip-op">${efx.op}</span>
+          ${efx.value ? `<span class="chip-val">&quot;${esc(efx.value)}&quot;</span>` : ''}
+          <button class="chip-x" onclick="removeElseEffect('${m.id}','${ix.id}')">&#215;</button>
+        </div>`;
+      }
+      const elseBtn = !elseEffects.length
+        ? `<button class="btn-else" onclick="addElseEffect('${m.id}','${ix.id}')">+ else</button>`
+        : '';
+      return `<div class="rx-effect-wrap">
+        <div class="rx-effect" style="flex-wrap:wrap;gap:4px">
+          <select class="cond-sel" onchange="updateCondOp('${m.id}','${ix.id}',this.value)">${condOpts}</select>
+          ${condValInp}
+          <span class="rx-arrow">&#8594;</span>
+          <span class="rx-tname" style="color:${tc}">${esc(label)}</span>${tagB}
+          ${pipeChips}
+          <select id="rps-${ix.id}" class="pipe-sel-sm"><option value="">&#9658;pipe</option>${allPresetOpts()}</select>
+          <button class="pipe-add-sm" onclick="addWiringPreset('${m.id}','${ix.id}')">+</button>
+          <span class="chip-op">${fx.op}</span>
+          ${fx.value ? `<span class="chip-val">&quot;${esc(fx.value)}&quot;</span>` : ''}
+          ${elseBtn}
+          <button class="chip-x ix-rm" data-ixid="${ix.id}">&#215;</button>
+        </div>
+        ${elseRow}
+      </div>`;
+    }).join('');
+
+    const tgtOpts = `<option value="${m.id}">(self)</option>` +
+      [...machines.keys()].filter(id => id !== m.id).map(id => {
+        const tm = machines.get(id);
+        return `<option value="${id}">${esc(tm.name)}</option>`;
+      }).join('');
+
+    return `<div class="rx-card" style="border-left-color:${ec}">
+      <div class="rx-hd">
+        <span class="chip-kw">on</span>
+        <span class="chip-ev" style="background:rgba(${hexToRgb(ec)},.15);color:${ec}">${esc(evType)}</span>
+        <button class="rx-rm-all" data-rmev="${esc(evType)}">&#215; remove</button>
+      </div>
+      <div class="rx-effects">${fxH || '<span class="rx-empty">no effects yet</span>'}</div>
+      <div class="rx-add">
+        <span class="rx-arrow" style="flex-shrink:0">&#8594;</span>
+        <select id="rxat-${idx}" style="flex:2">${tgtOpts}</select>
+        <select id="rxop-${idx}" style="flex:1">${OPS.map(o=>`<option>${o}</option>`).join('')}</select>
+        <input id="rxval-${idx}" placeholder="value" style="flex:1">
+        <button class="rx-go" onclick="addEffect('${m.id}',${idx},'${esc(evType)}')">+ effect</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  const tgtNew = `<option value="${m.id}">(self)</option>` +
+    [...machines.keys()].filter(id => id !== m.id).map(id => {
+      const tm = machines.get(id);
+      return `<option value="${id}">${esc(tm.name)}</option>`;
+    }).join('');
+
+  return `
+    <div id="rx-grid">${cards || '<span style="font-size:10px;color:var(--tx3)">No reactions yet</span>'}</div>
+    <div class="rx-new">
+      <span class="chip-kw">on</span>
+      <select id="rx-new-ev" class="reg-sel" style="flex:2">${registryEventOpts('')}</select>
+      <span class="rx-arrow">&#8594;</span>
+      <select id="rx-new-tgt" style="flex:2">${tgtNew}</select>
+      <select id="rx-new-op" style="flex:1">${OPS.map(o=>`<option>${o}</option>`).join('')}</select>
+      <input id="rx-new-val" placeholder="value" style="flex:1">
+      <button class="btn-add" onclick="addRule('${m.id}')">+ Add Rule</button>
+    </div>
+    <div class="quick-ev-row">
+      <span class="kw" style="font-size:9px;flex-shrink:0">new event:</span>
+      <input id="rx-new-reg-ev" class="quick-ev-inp" placeholder="register…" onkeydown="if(event.key==='Enter')quickRegisterEvent('rx-new-reg-ev')">
+      <button class="btn-reg" onclick="quickRegisterEvent('rx-new-reg-ev')">+ Ev</button>
+    </div>
+  `;
+}
+
+function updateCondOp(mId, ixId, op) {
+  const m = machines.get(mId); if (!m) return;
+  const ix = m.interactions.find(i => i.id === ixId); if (!ix) return;
+  ix.condition = { op, value: ix.condition?.value || '' };
+  renderInspector();
+}
+function updateCondVal(mId, ixId, val) {
+  const m = machines.get(mId); if (!m) return;
+  const ix = m.interactions.find(i => i.id === ixId); if (!ix) return;
+  ix.condition = { ...ix.condition, value: val };
+}
+function addElseEffect(mId, ixId) {
+  const m = machines.get(mId); if (!m) return;
+  const ix = m.interactions.find(i => i.id === ixId); if (!ix) return;
+  const fx = ix.effects[0];
+  ix.elseEffects = [{ targetId: fx.targetId, op: fx.op, value: '' }];
+  renderInspector();
+}
+function removeElseEffect(mId, ixId) {
+  const m = machines.get(mId); if (!m) return;
+  const ix = m.interactions.find(i => i.id === ixId); if (!ix) return;
+  ix.elseEffects = [];
+  renderInspector();
+}
+
+function addRule(mId) {
+  const m = machines.get(mId); if (!m) return;
+  const evType   = gid('rx-new-ev')?.value || '';
+  const targetId = gid('rx-new-tgt')?.value || mId;
+  const op       = gid('rx-new-op')?.value  || 'set';
+  const value    = gid('rx-new-val')?.value.trim() || '';
+  if (!evType) { setStatus('Pick or register an event first'); return; }
+  registerEvent(evType);
+  m.addInteraction({ id:mkIid(), trigger:{type:evType,sourceId:'*'}, condition:{op:'always'}, instructions:[], effects:[{targetId,op,value}] });
+  renderInspector();
+  setStatus('Rule added');
+}
+
+function addEffect(mId, idx, evType) {
+  const m = machines.get(mId); if (!m) return;
+  const targetId = gid('rxat-'+idx)?.value || mId;
+  const op       = gid('rxop-'+idx)?.value || 'set';
+  const value    = gid('rxval-'+idx)?.value.trim() || '';
+  m.addInteraction({ id:mkIid(), trigger:{type:evType,sourceId:'*'}, condition:{op:'always'}, instructions:[], effects:[{targetId,op,value}] });
+  renderInspector();
+  setStatus('Effect added');
+}
+
+// ── PIPELINE EDITOR ───────────────────────────────────────────────────────────
+function allPresetOpts() {
+  return Object.entries(PRESET_GROUPS).map(([grp, names]) =>
+    `<optgroup label="${grp}">${names.map(n => `<option value="${n}">${n}</option>`).join('')}</optgroup>`
+  ).join('');
+}
+
+function renderPipelineEditor(m, type) {
+  const key   = type === 'input' ? 'inputinstructions' : 'outputinstructions';
+  const color = type === 'input' ? 'var(--gn)' : 'var(--or)';
+  const arr   = m[key] || [];
+  const chips = arr.map((inst, i) =>
+    `<span class="pipe-chip" style="border-color:${color};color:${color}">${esc(inst.preset)}<button class="chip-x" onclick="removePreset('${m.id}','${type}',${i})">&#215;</button></span>` +
+    (i < arr.length - 1 ? '<span class="pipe-arrow">&#9658;</span>' : '')
+  ).join('');
+  return `
+    <div class="pipeline">${chips || '<span style="font-size:10px;color:var(--tx3)">No transforms — passes through unchanged</span>'}</div>
+    <div class="add-row" style="padding-top:8px">
+      <select id="pipe-sel-${type}" class="pipe-sel">${allPresetOpts()}</select>
+      <button class="btn-add" onclick="addPreset('${m.id}','${type}')">+ Add</button>
+    </div>`;
+}
+
+function addPreset(mId, type) {
+  const m = machines.get(mId); if (!m) return;
+  const key    = type === 'input' ? 'inputinstructions' : 'outputinstructions';
+  const preset = gid('pipe-sel-' + type)?.value; if (!preset) return;
+  m[key].push({preset});
+  renderInspector(); setStatus(type + ' preset added: ' + preset);
+}
+
+function removePreset(mId, type, idx) {
+  const m = machines.get(mId); if (!m) return;
+  const key = type === 'input' ? 'inputinstructions' : 'outputinstructions';
+  m[key].splice(idx, 1);
+  renderInspector(); setStatus(type + ' preset removed');
+}
+
+function addWiringPreset(mId, ixId) {
+  const m = machines.get(mId); if (!m) return;
+  const ix = m.interactions.find(i => i.id === ixId); if (!ix) return;
+  const preset = gid('rps-' + ixId)?.value; if (!preset) return;
+  if (!ix.instructions) ix.instructions = [];
+  ix.instructions.push({preset});
+  renderInspector(); setStatus('Wiring preset added: ' + preset);
+}
+
+function removeWiringPreset(mId, ixId, idx) {
+  const m = machines.get(mId); if (!m) return;
+  const ix = m.interactions.find(i => i.id === ixId); if (!ix) return;
+  if (!ix.instructions) return;
+  ix.instructions.splice(idx, 1);
+  renderInspector(); setStatus('Wiring preset removed');
+}
+
+// ── STYLES EDITOR ─────────────────────────────────────────────────────────────
+function renderStylesEditor(m) {
+  const dl = `<datalist id="css-props-dl">${CSS_PROPS.map(p => `<option value="${p}">`).join('')}</datalist>`;
+  const isColor = p => /color|background/.test(p);
+  const rows = Object.entries(m.styles).map(([prop, val]) => {
+    const swatch = isColor(prop) ? `<input type="color" class="sty-swatch" value="${/^#/.test(val)?val:'#000000'}" oninput="setStyleVal('${m.id}','${esc(prop)}',this.value)" onchange="setStyleVal('${m.id}','${esc(prop)}',this.value)">` : '';
+    return `<div class="sty-row">
+      <input class="sty-prop" value="${esc(prop)}" list="css-props-dl" placeholder="property" onchange="renameStyleProp('${m.id}','${esc(prop)}',this.value)">
+      <span class="sty-colon">:</span>
+      <input class="sty-val" value="${esc(val)}" placeholder="value" oninput="setStyleVal('${m.id}','${esc(prop)}',this.value)">
+      ${swatch}
+      <button class="btn-rm" onclick="removeStyle('${m.id}','${esc(prop)}')">&#215;</button>
+    </div>`;
+  }).join('');
+  return `${dl}
+    <div id="sty-list">${rows || '<span style="font-size:10px;color:var(--tx3)">No styles yet</span>'}</div>
+    <div class="add-row">
+      <input id="sty-new-prop" class="sty-prop" list="css-props-dl" placeholder="property…">
+      <span class="sty-colon">:</span>
+      <input id="sty-new-val" class="sty-val" placeholder="value…">
+      <button class="btn-add" onclick="addStyle('${m.id}')">+ Add</button>
+    </div>`;
+}
+
+function addStyle(mId) {
+  const m = machines.get(mId); if (!m) return;
+  const prop = gid('sty-new-prop')?.value.trim();
+  const val  = gid('sty-new-val')?.value.trim() || '';
+  if (!prop) { setStatus('Enter a CSS property'); return; }
+  m.styles[prop] = val;
+  patchStyles(mId); renderInspector(); setStatus('Style added');
+}
+
+function removeStyle(mId, prop) {
+  const m = machines.get(mId); if (!m) return;
+  delete m.styles[prop];
+  patchStyles(mId); renderInspector(); setStatus('Style removed');
+}
+
+function renameStyleProp(mId, oldProp, newProp) {
+  const m = machines.get(mId); if (!m || !newProp.trim()) return;
+  const val = m.styles[oldProp];
+  delete m.styles[oldProp];
+  m.styles[newProp.trim()] = val;
+  patchStyles(mId); renderInspector();
+}
+
+function setStyleVal(mId, prop, val) {
+  const m = machines.get(mId); if (!m) return;
+  m.styles[prop] = val;
+  const el = document.querySelector(`[data-mid="${mId}"]`);
+  if (el) el.style.setProperty(prop, val);
+}
+
+// ── ATTRS EDITOR ──────────────────────────────────────────────────────────────
+function renderAttrsEditor(m) {
+  const dl = `<datalist id="html-attrs-dl">${HTML_ATTRS.map(a => `<option value="${a}">`).join('')}</datalist>`;
+  const rows = Object.entries(m.attrs).map(([attr, val]) =>
+    `<div class="attr-row">
+      <input class="attr-key" value="${esc(attr)}" list="html-attrs-dl" placeholder="attribute" onchange="renameAttr('${m.id}','${esc(attr)}',this.value)">
+      <span class="sty-colon">=</span>
+      <input class="attr-val" value="${esc(val)}" placeholder="value" oninput="setAttrVal('${m.id}','${esc(attr)}',this.value)">
+      <button class="btn-rm" onclick="removeAttr('${m.id}','${esc(attr)}')">&#215;</button>
+    </div>`
+  ).join('');
+  return `${dl}
+    <div id="attr-list">${rows || '<span style="font-size:10px;color:var(--tx3)">No attributes yet</span>'}</div>
+    <div class="add-row">
+      <input id="attr-new-key" class="attr-key" list="html-attrs-dl" placeholder="attribute…">
+      <span class="sty-colon">=</span>
+      <input id="attr-new-val" class="attr-val" placeholder="value…">
+      <button class="btn-add" onclick="addAttr('${m.id}')">+ Add</button>
+    </div>`;
+}
+
+function addAttr(mId) {
+  const m = machines.get(mId); if (!m) return;
+  const attr = gid('attr-new-key')?.value.trim();
+  const val  = gid('attr-new-val')?.value || '';
+  if (!attr) { setStatus('Enter an attribute name'); return; }
+  m.attrs[attr] = val;
+  patchAttrs(mId); renderInspector(); setStatus('Attribute added');
+}
+
+function removeAttr(mId, attr) {
+  const m = machines.get(mId); if (!m) return;
+  const el = document.querySelector(`[data-mid="${mId}"]`);
+  if (el) el.removeAttribute(attr);
+  delete m.attrs[attr];
+  renderInspector(); setStatus('Attribute removed');
+}
+
+function renameAttr(mId, oldAttr, newAttr) {
+  const m = machines.get(mId); if (!m || !newAttr.trim()) return;
+  const val = m.attrs[oldAttr];
+  const el = document.querySelector(`[data-mid="${mId}"]`);
+  if (el) el.removeAttribute(oldAttr);
+  delete m.attrs[oldAttr];
+  m.attrs[newAttr.trim()] = val;
+  patchAttrs(mId); renderInspector();
+}
+
+function setAttrVal(mId, attr, val) {
+  const m = machines.get(mId); if (!m) return;
+  m.attrs[attr] = val;
+  const el = document.querySelector(`[data-mid="${mId}"]`);
+  if (el) el.setAttribute(attr, val);
+}
+
+// ── FIELD HELPERS ─────────────────────────────────────────────────────────────
+function renameMachine(id, v) { const m=machines.get(id); if(m){m.name=v||'Machine'; renderTree(); renderDomTree();} }
+function changeTag(id, v)     { const m=machines.get(id); if(m){m.tag=v; buildPreview();} }
+function changeData(id, v)    { const m=machines.get(id); if(m){m.data=v; patchEl(id); renderDomTree();} }
+function changeHidden(id, v)  { const m=machines.get(id); if(m){m.hidden=v; patchEl(id); renderDomTree();} }
+function changeLayout(id, v)  { const m=machines.get(id); if(m){m.layout=v; patchEl(id);} }
+function refreshDataField()   { const m=machines.get(selId); if(m){const i=gid('ins-data');if(i)i.value=m.data;} }
+
+// ── DOM LISTENER HELPERS ──────────────────────────────────────────────────────
+function addDL(id) {
+  const m = machines.get(id); if (!m) return;
+  const on    = gid('dl-on')?.value    || 'click';
+  const fires = gid('dl-fires')?.value || '';
+  if (!fires) { setStatus('Pick or register an event first'); return; }
+  registerEvent(fires);
+  m.domListeners.push({on, fires});
+  buildPreview(); renderInspector(); setStatus('Listener added');
+}
+function removeDL(id, idx) {
+  const m = machines.get(id); if (!m) return;
+  m.domListeners.splice(idx, 1);
+  buildPreview(); renderInspector();
+}
+function updateDL(id, idx, key, val) {
+  const m = machines.get(id); if (!m) return;
+  m.domListeners[idx][key] = val;
+  if (key === 'fires' && val) registerEvent(val);
+  buildPreview();
+}
+
+// ── LIVE PREVIEW ──────────────────────────────────────────────────────────────
+function mkEl(m) {
+  const el = document.createElement(m.tag);
+  el.setAttribute('data-mid', m.id);
+  Object.entries(m.styles).forEach(([p, v]) => { if (p && v != null) el.style.setProperty(p, v); });
+  Object.entries(m.attrs).forEach(([a, v]) => { if (a) el.setAttribute(a, v); });
+  if (m.hidden) { el.style.display = 'none'; }
+  else if (m.layout) { el.style.display = m.layout; }
+  if (VOID_TAGS.has(m.tag)) {
+    if (m.tag === 'input') { el.value = m.data; el.placeholder = m.name; }
+  } else {
+    if (!m.childIds.length && m.data) el.textContent = m.data;
+    m.childIds.forEach(cid => { const c = machines.get(cid); if (c) el.appendChild(mkEl(c)); });
+  }
+  m.domListeners.forEach(dl => {
+    el.addEventListener(dl.on, e => {
+      e.stopPropagation();
+      const raw = m.tag === 'input' ? el.value : m.data;
+      const out = m.outputinstructions && m.outputinstructions.length
+        ? runPipeline(raw, m.outputinstructions) : raw;
+      Bus.emit({ type: dl.fires, sourceId: m.id, value: pipeToStr(out) });
+    });
+  });
+  return el;
+}
+
+function buildPreview() {
+  const canvas = gid('prev-canvas');
+  canvas.innerHTML = '';
+  roots.forEach(id => { const m = machines.get(id); if (m) canvas.appendChild(mkEl(m)); });
+  syncPreviewSel();
+  renderDomTree();
+  wirePreviewInteraction();
+}
+
+function patchEl(id) {
+  const m = machines.get(id); if (!m) return;
+  const el = document.querySelector(`[data-mid="${id}"]`); if (!el) return;
+  patchStyles(id);
+  if (m.hidden) { el.style.display = 'none'; return; }
+  el.style.display = m.layout || '';
+  if (!VOID_TAGS.has(m.tag) && !m.childIds.length) el.textContent = m.data;
+  if (m.tag === 'input') el.value = m.data;
+}
+
+function patchStyles(id) {
+  const m = machines.get(id); if (!m) return;
+  const el = document.querySelector(`[data-mid="${id}"]`); if (!el) return;
+  el.removeAttribute('style');
+  Object.entries(m.styles).forEach(([p, v]) => { if (p && v != null) el.style.setProperty(p, v); });
+  Object.entries(m.attrs).forEach(([a, v]) => { if (a && a !== 'data-mid') el.setAttribute(a, v); });
+}
+
+function patchAttrs(id) {
+  const m = machines.get(id); if (!m) return;
+  const el = document.querySelector(`[data-mid="${id}"]`); if (!el) return;
+  Object.entries(m.attrs).forEach(([a, v]) => { if (a && a !== 'data-mid') el.setAttribute(a, v); });
+}
+
+// ── PREVIEW INTERACTION (click-to-select, hover) ──────────────────────────────
+function wirePreviewInteraction() {
+  const canvas = gid('prev-canvas');
+  canvas.addEventListener('mouseover', e => {
+    const el = e.target.closest('[data-mid]');
+    document.querySelectorAll('[data-mid].mc-hover').forEach(x => x.classList.remove('mc-hover'));
+    if (el && !el.classList.contains('mc-sel')) el.classList.add('mc-hover');
+  }, { capture: true, once: false });
+  canvas.addEventListener('mouseout', e => {
+    const el = e.target.closest('[data-mid]');
+    if (el) el.classList.remove('mc-hover');
+  }, { capture: true });
+  canvas.addEventListener('click', e => {
+    const el = e.target.closest('[data-mid]');
+    if (el) selectMachine(el.getAttribute('data-mid'));
+  }, { capture: true });
+}
+
+function syncPreviewSel() {
+  document.querySelectorAll('[data-mid].mc-sel').forEach(el => el.classList.remove('mc-sel'));
+  if (selId) {
+    const el = document.querySelector(`[data-mid="${selId}"]`);
+    if (el) { el.classList.remove('mc-hover'); el.classList.add('mc-sel'); }
+  }
+}
+
+function hoverPreview(id, on) {
+  document.querySelectorAll('[data-mid].mc-hover').forEach(el => el.classList.remove('mc-hover'));
+  if (on && id !== selId) {
+    const el = document.querySelector(`[data-mid="${id}"]`);
+    if (el) el.classList.add('mc-hover');
+  }
+}
+
+// ── DOM TREE VIEW ─────────────────────────────────────────────────────────────
+function renderDomTree() {
+  const pane = gid('dom-pane'); if (!pane) return;
+  pane.innerHTML = '';
+  function row(id, depth) {
+    const m = machines.get(id); if (!m) return;
+    const c          = colorOf(id);
+    const hasKids    = m.childIds.length > 0;
+    const collapsed  = domCollapsed.has(id);
+    const hasDL      = m.domListeners.length > 0;
+
+    const div = document.createElement('div');
+    div.className  = 'dom-node' + (selId === id ? ' sel' : '');
+    div.style.paddingLeft = (6 + depth * 16) + 'px';
+    div.innerHTML =
+      `<span class="dom-exp ${hasKids ? (collapsed?'closed':'') : 'leaf'}">&#9660;</span>` +
+      `<span class="dom-angle">&lt;</span><span class="dom-tag">${m.tag}</span><span class="dom-angle">&gt;</span>` +
+      `<span class="dom-mname" style="color:${c}">${esc(m.name)}</span>` +
+      (hasDL ? '<span class="dom-has-dl" title="has DOM listeners"></span>' : '') +
+      (m.data && !hasKids ? `<span class="dom-val">"${esc(m.data)}"</span>` : '') +
+      (m.hidden ? '<span class="dom-hidden">hidden</span>' : '');
+
+    div.onclick = e => {
+      if (e.target.classList.contains('dom-exp')) {
+        e.stopPropagation();
+        if (collapsed) domCollapsed.delete(id); else domCollapsed.add(id);
+        renderDomTree(); return;
+      }
+      selectMachine(id);
+    };
+    div.onmouseenter = () => hoverPreview(id, true);
+    div.onmouseleave = () => hoverPreview(id, false);
+    pane.appendChild(div);
+    if (!collapsed) m.childIds.forEach(cid => row(cid, depth + 1));
+  }
+  roots.forEach(id => row(id, 0));
+}
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+function switchTab(name) {
+  ['preview','dom','events','vars','db'].forEach(t => {
+    gid('tab-'+t)?.classList.toggle('active', t === name);
+    gid('rpane-'+t)?.classList.toggle('active', t === name);
+  });
+  if (name === 'dom')    renderDomTree();
+  if (name === 'events') renderEventRegistry();
+  if (name === 'vars')   renderVarPanel();
+  if (name === 'db')     renderDBPanel();
+}
+
+// ── EVENT LOG ─────────────────────────────────────────────────────────────────
+function appendLog(ev) {
+  const list = gid('log-list'); if (!list) return;
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  const src  = machines.get(ev.sourceId);
+  const name = src ? src.name : (ev.sourceId || '?');
+  const val  = ev.value != null ? String(ev.value).slice(0, 28) : '';
+  entry.innerHTML =
+    `<span class="log-ts">${tsNow()}</span>` +
+    `<span class="log-type">${esc(ev.type)}</span>` +
+    `<span class="log-src">← ${esc(name)}</span>` +
+    (val ? `<span class="log-val">${esc(val)}</span>` : '');
+  list.insertBefore(entry, list.firstChild);
+  while (list.children.length > 80) list.removeChild(list.lastChild);
+}
+function clearLog() { const l = gid('log-list'); if (l) l.innerHTML = ''; }
+function tsNow() {
+  const d = new Date();
+  return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2,'0')).join(':');
+}
+
+// ── BUS PULSE ─────────────────────────────────────────────────────────────────
+function pulseBusDot() {
+  const d = gid('bus-dot'); if (!d) return;
+  d.classList.remove('pulse-anim'); void d.offsetWidth; d.classList.add('pulse-anim');
+}
+
+// ── STATUS ────────────────────────────────────────────────────────────────────
+function setStatus(msg) { const el = gid('st-msg'); if (el) el.textContent = msg; }
+function updateSt()     { const el = gid('st-machines'); if (el) el.textContent = machines.size + ' machine' + (machines.size!==1?'s':''); }
+
+// ── ADD MODAL ─────────────────────────────────────────────────────────────────
+let _chosenTag = 'div';
+function openAddModal() {
+  _chosenTag = 'div';
+  const par = gid('m-parent');
+  par.innerHTML = '<option value="">(root)</option>';
+  machines.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id; opt.textContent = m.name + ' (' + m.id + ')';
+    par.appendChild(opt);
+  });
+  gid('m-name').value = '';
+  gid('m-data').value = '';
+  buildTagGroupUI();
+  gid('modal-overlay').classList.add('open');
+  setTimeout(() => gid('m-name').focus(), 50);
+}
+function closeModal() { gid('modal-overlay').classList.remove('open'); }
+
+function buildTagGroupUI() {
+  const c = gid('tag-groups'); c.innerHTML = '';
+  Object.entries(TAG_GROUPS).forEach(([group, tags]) => {
+    const lbl = document.createElement('div');
+    lbl.className = 'tag-group-label'; lbl.textContent = group;
+    c.appendChild(lbl);
+    const row = document.createElement('div');
+    row.className = 'tag-btn-row';
+    tags.forEach(tag => {
+      const btn = document.createElement('button');
+      btn.className = 'tag-btn' + (tag === _chosenTag ? ' sel' : '');
+      btn.textContent = tag; btn.type = 'button';
+      btn.onclick = () => {
+        _chosenTag = tag; gid('m-tag').value = tag;
+        c.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('sel'));
+        btn.classList.add('sel');
+      };
+      row.appendChild(btn);
+    });
+    c.appendChild(row);
+  });
+  gid('m-tag').value = _chosenTag;
+}
+
+function confirmAdd() {
+  const name     = gid('m-name').value.trim() || 'Machine';
+  const tag      = gid('m-tag').value         || 'div';
+  const data     = gid('m-data').value;
+  const parentId = gid('m-parent').value      || null;
+  closeModal();
+  const m = addMachine({ name, tag, data }, parentId);
+  selectMachine(m.id);
+}
+
+// ── SERIALISE / LOAD ──────────────────────────────────────────────────────────
+function serialise() {
+  const dbOut = {};
+  dbStore.forEach((docs, colName) => {
+    dbOut[colName] = [];
+    docs.forEach(doc => dbOut[colName].push({...doc}));
+  });
+  const out = { version: 2, roots: [...roots], vars: Object.fromEntries(varStore), db: dbOut, machines: {} };
+  machines.forEach((m, id) => {
+    out.machines[id] = {
+      id: m.id, name: m.name, tag: m.tag, data: m.data,
+      hidden: m.hidden, layout: m.layout, source: m.source, dbRef: m.dbRef ? {...m.dbRef} : null,
+      dbQuery: m.dbQuery ? {...m.dbQuery} : null,
+      styles: {...m.styles}, attrs: {...m.attrs},
+      inputinstructions:  m.inputinstructions.map(i => ({...i})),
+      outputinstructions: m.outputinstructions.map(i => ({...i})),
+      parentId: m.parentId, childIds: [...m.childIds],
+      domListeners: m.domListeners.map(d => ({...d})),
+      interactions: m.interactions.map(ix => ({
+        id: ix.id, trigger:{...ix.trigger}, condition:{...ix.condition},
+        instructions: ix.instructions ? ix.instructions.map(i => ({...i})) : [],
+        effects: ix.effects.map(fx => ({...fx})),
+        elseEffects: ix.elseEffects ? ix.elseEffects.map(fx => ({...fx})) : [],
+      })),
+    };
+  });
+  return out;
+}
+
+function loadFrom(data) {
+  clearAll(true);
+  Object.entries(data.vars || {}).forEach(([k, v]) => varStore.set(k, String(v)));
+  Object.entries(data.db || {}).forEach(([colName, docs]) => {
+    const col = new Map();
+    (Array.isArray(docs) ? docs : Object.values(docs)).forEach(doc => {
+      const d = {...doc};
+      if (!d._id) d._id = mkDocId();
+      col.set(d._id, d);
+    });
+    dbStore.set(colName, col);
+  });
+  roots = data.roots ? [...data.roots] : (data.rootIds ? [...data.rootIds] : []);
+  const mdata = data.machines || {};
+  Object.values(mdata).forEach(cfg => {
+    const normalized = {
+      ...cfg,
+      data: cfg.data ?? cfg.datavalue ?? '',
+      interactions: [],
+    };
+    const m = new Machine(normalized);
+    machines.set(m.id, m);
+    const n = parseInt(m.id.replace(/\D/g,''));
+    if (!isNaN(n) && n >= _mid) _mid = n + 1;
+  });
+  Object.values(mdata).forEach(cfg => {
+    const m = machines.get(cfg.id); if (!m) return;
+    (cfg.interactions || []).forEach(ix => m.addInteraction(ix));
+    (cfg.wirings || []).forEach(w => {
+      m.addInteraction({
+        id: w.id || mkIid(),
+        trigger: { type: w.eventType, sourceId: w.sourceId || '*' },
+        condition: { op: 'always' },
+        instructions: w.instructions ? w.instructions.map(i => ({...i})) : [],
+        effects: [{ targetId: m.id, op: 'set', value: '' }],
+      });
+    });
+  });
+  machines.forEach(m => {
+    if (m.source    && varStore.has(m.source))    m.data = String(varStore.get(m.source));
+    if (m.dbRef && m.dbRef.collection && m.dbRef.docId && m.dbRef.field) {
+      const _c = dbStore.get(m.dbRef.collection);
+      const _d = _c && _c.get(m.dbRef.docId);
+      if (_d && _d[m.dbRef.field] != null) m.data = String(_d[m.dbRef.field]);
+    }
+    if (m.dbQuery)                                m.data = runDbQuery(m);
+  });
+  scanAndRegisterEvents();
+  renderTree(); renderInspector(); buildPreview(); updateSt();
+}
+
+function exportJSON() {
+  dl(new Blob([JSON.stringify(serialise(), null, 2)], {type:'application/json'}), 'machines.json');
+  setStatus('Exported');
+}
+function importJSON() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = async e => {
+    try { loadFrom(JSON.parse(await e.target.files[0].text())); setStatus('Imported'); }
+    catch (err) { setStatus('Import failed: ' + err.message); }
+  };
+  inp.click();
+}
+function clearAll(silent) {
+  machines.forEach(m => m.unmount()); machines.clear(); eventRegistry.clear(); varStore.clear(); dbStore.clear(); dbSelCol = ''; roots = []; selId = null;
+  Bus.reset(); renderTree(); renderInspector(); buildPreview(); clearLog(); updateSt();
+  gid('bus-count').textContent = '0 events';
+  gid('st-events').textContent = '0 events';
+  if (!silent) setStatus('Cleared');
+}
+
+// ── DEPLOY ────────────────────────────────────────────────────────────────────
+function deployHTML() {
+  let snap;
+  try { snap = JSON.stringify(serialise()); }
+  catch(e) { setStatus('Deploy error (serialise): ' + e.message); console.error(e); return; }
+  let html;
+  try {
+    html = deployBuildHTML(snap);
+  } catch(e) { setStatus('Deploy error (build): ' + e.message); console.error(e); return; }
+  try {
+    dl(new Blob([html], {type:'text/html'}), 'machine-app.html');
+    setStatus('Deployed as standalone HTML');
+  } catch(e) { setStatus('Deploy error (download): ' + e.message); console.error(e); }
+}
+
+function deployBuildHTML(snap) {
+  const safeSnap=snap.replace(/</g,'\\u003c').replace(/>/g,'\\u003e');
+  return `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Machine App</title><style>body{margin:0;font-family:system-ui,sans-serif}</style></head>
+<body><div id="root"></div><script>
+var _D=${safeSnap};
+var VOID=new Set(['input','br','hr','img','meta','link','area','base','col','embed','param','source','track','wbr']);
+var machines=new Map(),roots=[],_vars={},_db={};
+var VarStore={write:function(k,v){_vars[k]=String(v);machines.forEach(function(m){if(m.source===k&&m.data!==String(v)){m.data=String(v);patchEl(m.id);}});}};
+var DBStore={write:function(col,docId,field,val){var c=_db[col];if(!c)return;var d=c[docId];if(!d)return;d[field]=String(val);machines.forEach(function(m){if(m.dbRef&&m.dbRef.collection===col&&m.dbRef.docId===docId&&m.dbRef.field===field&&m.data!==String(val)){m.data=String(val);patchEl(m.id);}if(m.dbQuery)applyQ(m);});}};
+function runDbQuery(m){if(!m.dbQuery)return'';var f=m.dbQuery;var col=_db[f.collection];if(!col)return'';var res=[];Object.values(col).forEach(function(doc){var fv=doc[f.filterField],ok=false;if(f.filterOp==='any')ok=true;else if(f.filterOp==='contains')ok=String(fv||'').includes(f.filterVal);else if(f.filterOp==='startsWith')ok=String(fv||'').startsWith(f.filterVal);else if(f.filterOp==='endsWith')ok=String(fv||'').endsWith(f.filterVal);else if(f.filterOp==='equals')ok=String(fv||'')===String(f.filterVal);else if(f.filterOp==='not-equals')ok=String(fv||'')!==String(f.filterVal);else if(f.filterOp==='gt')ok=Number(fv||0)>Number(f.filterVal);else if(f.filterOp==='lt')ok=Number(fv||0)<Number(f.filterVal);if(ok)res.push(doc);});var pf=f.projectField||'';switch(f.display){case'count':return String(res.length);case'first':return res.length?String(res[0][pf]||''):'';case'json':return JSON.stringify(pf?res.map(function(d){return d[pf];}):res.map(function(d){var o=Object.assign({},d);delete o._id;return o;}));default:return res.map(function(d){return String(d[pf]||'');}).join(', ');}}
+function applyQ(m){if(!m.dbQuery)return;m.data=runDbQuery(m);patchEl(m.id);};
+var Bus=(function(){var s={},t=0;return{on:function(k,f){(s[k]=s[k]||[]).push(f);},off:function(k,f){if(s[k])s[k]=s[k].filter(function(x){return x!==f;});},emit:function(ev){ev.ts=Date.now();t++;(s[ev.type]||[]).slice().forEach(function(h){try{h(ev);}catch(e){}});},total:function(){return t;},reset:function(){t=0;}};})();
+var _m=1,_i=1;
+function mkId(){return 'M'+String(_m++).padStart(3,'0');}
+var PRESETS_D={toUpperCase:function(v){return String(v).toUpperCase();},toLowerCase:function(v){return String(v).toLowerCase();},trim:function(v){return String(v).trim();},reverse:function(v){return Array.isArray(v)?[].concat(v).reverse():String(v).split('').reverse().join('');},wrapQuotes:function(v){return '"'+v+'"';},wrapParens:function(v){return '('+v+')';},words:function(v){return String(v).trim().split(/\s+/).filter(Boolean);},chars:function(v){return String(v).split('');},lines:function(v){return String(v).split('\\n');},length:function(v){return Array.isArray(v)?v.length:String(v).length;},first:function(v){return Array.isArray(v)?(v[0]||''):(String(v)[0]||'');},last:function(v){return Array.isArray(v)?(v[v.length-1]||''):String(v).slice(-1);},join:function(v){return Array.isArray(v)?v.join(' '):String(v);},stringify:function(v){return JSON.stringify(v);},toNumber:function(v){return Number(v);},increment:function(v){return(parseFloat(v)||0)+1;},decrement:function(v){return(parseFloat(v)||0)-1;},double:function(v){return(parseFloat(v)||0)*2;},round:function(v){return Math.round(parseFloat(v)||0);},floor:function(v){return Math.floor(parseFloat(v)||0);},abs:function(v){return Math.abs(parseFloat(v)||0);},toBoolean:function(v){return !!v;},not:function(v){return !v;},isEmpty:function(v){return Array.isArray(v)?v.length===0:String(v).trim()==='';},json:function(v){try{return JSON.parse(String(v));}catch(_){return v;}},date:function(){return new Date().toLocaleDateString();},time:function(){return new Date().toLocaleTimeString();}};
+function runPipe(value,arr){if(!arr||!arr.length)return value;return arr.reduce(function(v,i){var f=PRESETS_D[i.preset];return f?f(v):v;},value);}
+function p2s(v){if(Array.isArray(v))return v.join(', ');return v==null?'':String(v);}
+function condCheck(v,c){if(!c||c.op==='always')return true;var sv=String(v||''),nv=Number(v),cv=String(c.value||'');if(c.op==='truthy')return !!v;if(c.op==='falsy')return !v;if(c.op==='equals')return sv===cv;if(c.op==='not-equals')return sv!==cv;if(c.op==='contains')return sv.includes(cv);if(c.op==='gt')return nv>Number(c.value);if(c.op==='lt')return nv<Number(c.value);return true;}
+function doEffect(fx,ev){var m=machines.get(fx.targetId);if(!m)return;var val=(fx.value!=null&&fx.value!=='')?fx.value:(ev.value||'');if(fx.op==='set')m.data=String(val);else if(fx.op==='append')m.data=(m.data||'')+String(val);else if(fx.op==='clear')m.data='';else if(fx.op==='increment')m.data=String((parseFloat(m.data)||0)+(parseFloat(val)||1));else if(fx.op==='toggle')m.hidden=!m.hidden;else if(fx.op==='show')m.hidden=false;else if(fx.op==='hide')m.hidden=true;else if(fx.op==='emit'){Bus.emit({type:String(val||'signal'),sourceId:fx.targetId,value:m.data});return;}if(fx.op!=='toggle'&&fx.op!=='show'&&fx.op!=='hide'&&m.inputinstructions&&m.inputinstructions.length)m.data=p2s(runPipe(m.data,m.inputinstructions));if(m.source&&fx.op!=='toggle'&&fx.op!=='show'&&fx.op!=='hide')VarStore.write(m.source,m.data);if(m.dbRef&&m.dbRef.field&&fx.op!=='toggle'&&fx.op!=='show'&&fx.op!=='hide')DBStore.write(m.dbRef.collection,m.dbRef.docId,m.dbRef.field,m.data);patchEl(fx.targetId);}
+function Machine(cfg){this.id=cfg.id||mkId();this.name=cfg.name||'M';this.tag=cfg.tag||'div';this.data=cfg.data!=null?String(cfg.data):'';this.hidden=!!cfg.hidden;this.layout=cfg.layout||'';this.styles=cfg.styles?Object.assign({},cfg.styles):{};this.attrs=cfg.attrs?Object.assign({},cfg.attrs):{};this.inputinstructions=cfg.inputinstructions?cfg.inputinstructions.slice():[];this.outputinstructions=cfg.outputinstructions?cfg.outputinstructions.slice():[];this.parentId=cfg.parentId||null;this.childIds=cfg.childIds?cfg.childIds.slice():[];this.domListeners=cfg.domListeners?cfg.domListeners.map(function(d){return Object.assign({},d);}):[];this.source=cfg.source||'';this.dbRef=cfg.dbRef||null;this.dbQuery=cfg.dbQuery||null;this.interactions=[];this._handlers=[];if(cfg.interactions)cfg.interactions.forEach(function(ix){this._wire(ix);},this);}
+Machine.prototype._wire=function(ix){var fn=function(ev){if(ix.trigger.sourceId&&ix.trigger.sourceId!=='*'&&ev.sourceId!==ix.trigger.sourceId)return;var piped=ix.instructions&&ix.instructions.length?runPipe(ev.value,ix.instructions):ev.value;if(condCheck(piped,ix.condition)){ix.effects.forEach(function(fx){doEffect(fx,Object.assign({},ev,{value:piped}));});}else if(ix.elseEffects&&ix.elseEffects.length){ix.elseEffects.forEach(function(fx){doEffect(fx,Object.assign({},ev,{value:piped}));});}};Bus.on(ix.trigger.type,fn);this._handlers.push({ixId:ix.id,type:ix.trigger.type,fn:fn});this.interactions.push(ix);};
+function mkEl(m){var el=document.createElement(m.tag);el.setAttribute('data-mid',m.id);if(m.styles)Object.keys(m.styles).forEach(function(p){if(p&&m.styles[p]!=null)el.style.setProperty(p,m.styles[p]);});if(m.attrs)Object.keys(m.attrs).forEach(function(a){if(a)el.setAttribute(a,m.attrs[a]);});if(m.hidden)el.style.display='none';else if(m.layout)el.style.display=m.layout;if(VOID.has(m.tag)){if(m.tag==='input'){el.value=m.data;el.placeholder=m.name;}}else{if(!m.childIds.length&&m.data)el.textContent=m.data;m.childIds.forEach(function(cid){var c=machines.get(cid);if(c)el.appendChild(mkEl(c));});}m.domListeners.forEach(function(dl){el.addEventListener(dl.on,function(e){e.stopPropagation();var raw=m.tag==='input'?el.value:m.data;var out=m.outputinstructions&&m.outputinstructions.length?runPipe(raw,m.outputinstructions):raw;Bus.emit({type:dl.fires,sourceId:m.id,value:p2s(out)});});});return el;}
+function patchEl(id){var m=machines.get(id);if(!m)return;var el=document.querySelector('[data-mid="'+id+'"]');if(!el)return;el.removeAttribute('style');if(m.styles)Object.keys(m.styles).forEach(function(p){if(p&&m.styles[p]!=null)el.style.setProperty(p,m.styles[p]);});if(m.attrs)Object.keys(m.attrs).forEach(function(a){if(a&&a!=='data-mid')el.setAttribute(a,m.attrs[a]);});if(m.hidden){el.style.display='none';return;}el.style.display=m.layout||'';if(!VOID.has(m.tag)&&!m.childIds.length)el.textContent=m.data;if(m.tag==='input')el.value=m.data;}
+(function(){roots=_D.roots||[];Object.assign(_vars,_D.vars||{});Object.entries(_D.db||{}).forEach(function(e){var c={};(Array.isArray(e[1])?e[1]:Object.values(e[1])).forEach(function(d){c[d._id]=d;});_db[e[0]]=c;});Object.values(_D.machines).forEach(function(cfg){var m=new Machine(Object.assign({},cfg,{interactions:[]}));if(m.source&&_vars[m.source]!=null)m.data=String(_vars[m.source]);if(m.dbRef&&m.dbRef.collection&&m.dbRef.docId&&m.dbRef.field){var _c=_db[m.dbRef.collection];var _d=_c&&_c[m.dbRef.docId];if(_d&&_d[m.dbRef.field]!=null)m.data=String(_d[m.dbRef.field]);}if(m.dbQuery)m.data=runDbQuery(m);machines.set(m.id,m);});Object.values(_D.machines).forEach(function(cfg){if(cfg.interactions){var m=machines.get(cfg.id);if(m)cfg.interactions.forEach(function(ix){m._wire(ix);});}});var root=document.getElementById('root');roots.forEach(function(id){var m=machines.get(id);if(m)root.appendChild(mkEl(m));});})();
+<\/script></body></html>`;
+  dl(new Blob([html], {type:'text/html'}), 'machine-app.html');
+  setStatus('Deployed as standalone HTML');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function gid(id) { return document.getElementById(id); }
+function esc(s)  { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function dl(blob, name) { const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); }
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+// ── KEYBOARD ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Delete' && selId && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+    const m = machines.get(selId);
+    if (m && confirm('Delete "' + m.name + '"?')) removeMachine(selId);
+  }
+});
+
+// ── INIT SAMPLE ───────────────────────────────────────────────────────────────
+(function init() {
+  const page  = addMachine({ name:'Page',    tag:'section', layout:'flex', data:'' });
+  const title = addMachine({ name:'Title',   tag:'h1',      data:'Machine Constant' }, page.id);
+  const btn   = addMachine({ name:'Button',  tag:'button',  data:'Click me' }, page.id);
+  const count = addMachine({ name:'Counter', tag:'span',    data:'0' }, page.id);
+  const msg   = addMachine({ name:'Message', tag:'p',       data:'Hello from the Bus', hidden:true }, page.id);
+
+  btn.domListeners.push({ on:'click', fires:'clicked' });
+  btn.addInteraction({ id:mkIid(), trigger:{type:'clicked',sourceId:'*'}, condition:{op:'always'}, instructions:[], effects:[{targetId:count.id,op:'increment',value:'1'}] });
+  btn.addInteraction({ id:mkIid(), trigger:{type:'clicked',sourceId:'*'}, condition:{op:'always'}, instructions:[], effects:[{targetId:msg.id,op:'toggle',value:''}] });
+
+  scanAndRegisterEvents();
+  buildPreview();
+  selectMachine(btn.id);
+  setStatus('Ready — click elements in the preview to select them');
+})();
+</script>
+</body>
+</html>
