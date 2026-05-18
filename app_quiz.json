@@ -1,0 +1,194 @@
+{
+  "selectedId": null,
+  "db": {
+    "questions": [
+      {
+        "q": "What does HTML stand for?",
+        "options": [
+          "Hyper Text Markup Language",
+          "High Tech Modern Language",
+          "Hyperlink Text Machine Logic",
+          "Home Tool Markup Language"
+        ],
+        "answer": 0
+      },
+      {
+        "q": "Which CSS property changes text colour?",
+        "options": [
+          "text-color",
+          "font-color",
+          "color",
+          "background"
+        ],
+        "answer": 2
+      },
+      {
+        "q": "Which JS keyword declares a constant?",
+        "options": [
+          "let",
+          "var",
+          "def",
+          "const"
+        ],
+        "answer": 3
+      },
+      {
+        "q": "Which HTML tag creates a hyperlink?",
+        "options": [
+          "<link>",
+          "<a>",
+          "<href>",
+          "<url>"
+        ],
+        "answer": 1
+      },
+      {
+        "q": "What does JSON stand for?",
+        "options": [
+          "Java Serialised Object Node",
+          "JavaScript Ordered Numbers",
+          "JavaScript Object Notation",
+          "Just Some Other Notation"
+        ],
+        "answer": 2
+      }
+    ],
+    "currentQ": 0,
+    "score": 0,
+    "feedback": ""
+  },
+  "events": [
+    {
+      "name": "app:boot",
+      "defaultPayload": {
+        "booted": true
+      }
+    },
+    {
+      "name": "db:changed",
+      "defaultPayload": {
+        "path": "",
+        "value": null
+      }
+    }
+  ],
+  "machines": [
+    {
+      "id": "root",
+      "name": "Quiz App",
+      "tag": "section",
+      "parentId": null,
+      "text": "",
+      "attrs": {},
+      "styles": {
+        "padding": "32px",
+        "borderRadius": "24px",
+        "background": "rgba(255,255,255,.04)",
+        "maxWidth": "520px",
+        "margin": "0 auto"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_title",
+      "name": "Quiz Title",
+      "tag": "h2",
+      "parentId": "root",
+      "text": "Web Dev Quiz",
+      "attrs": {},
+      "styles": {
+        "margin": "0 0 18px",
+        "fontSize": "22px",
+        "color": "#6ee7ff",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_quiz",
+      "name": "Quiz Machine",
+      "tag": "div",
+      "parentId": "root",
+      "text": "",
+      "attrs": {},
+      "styles": {
+        "minHeight": "280px",
+        "padding": "4px 0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [
+        {
+          "id": "w_q_boot",
+          "trigger": "event",
+          "eventName": "app:boot",
+          "mode": "js",
+          "code": "var el=machine.el;var qs=dbGet('questions',[]);var idx=dbGet('currentQ',0);var score=dbGet('score',0);if(!el)return;el.innerHTML='';var badge=document.createElement('span');badge.className='badge';badge.textContent=machine.name;el.appendChild(badge);if(idx>=qs.length){  var emoji=score===qs.length?'🏆':score>=qs.length/2?'👍':'😅';  var done=document.createElement('div');done.style.cssText='text-align:center;padding:28px 0';  done.innerHTML='<div style=\"font-size:56px;margin-bottom:12px\">'+emoji+'</div><div style=\"font-size:26px;font-weight:bold;color:#86efac\">'+score+' / '+qs.length+'</div><div style=\"color:#9da9c2;font-size:14px;margin-top:6px\">Quiz complete!</div>';  el.appendChild(done);  var restart=document.createElement('button');  restart.style.cssText='margin-top:18px;display:block;padding:12px 32px;border-radius:12px;background:linear-gradient(135deg,#0ea5e9,#7c3aed);border:0;color:white;cursor:pointer;font-size:15px;font-weight:bold';  restart.textContent='Play Again';  restart.onclick=function(e){e.stopPropagation();dbSet('score',0);dbSet('currentQ',0);dbSet('feedback','');};  el.appendChild(restart);  return;}var prog=document.createElement('div');prog.style.cssText='font-size:12px;color:#9da9c2;margin-bottom:10px';prog.textContent='Q '+(idx+1)+' of '+qs.length+'  •  Score: '+score;el.appendChild(prog);var barWrap=document.createElement('div');barWrap.style.cssText='height:4px;border-radius:2px;background:rgba(255,255,255,.1);margin-bottom:18px;overflow:hidden';var barFill=document.createElement('div');barFill.style.cssText='height:100%;background:linear-gradient(90deg,#0ea5e9,#7c3aed);width:'+Math.round((idx/qs.length)*100)+'%';barWrap.appendChild(barFill);el.appendChild(barWrap);var item=qs[idx];var qt=document.createElement('div');qt.style.cssText='font-size:17px;font-weight:bold;color:#ecf2ff;margin-bottom:16px;line-height:1.4';qt.textContent=item.q;el.appendChild(qt);var fb=dbGet('feedback','');if(fb){  var fbEl=document.createElement('div');  var correct=fb==='correct';  fbEl.style.cssText='padding:9px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;'+(correct?'background:rgba(134,239,172,.15);color:#86efac;border:1px solid rgba(134,239,172,.35)':'background:rgba(251,113,133,.15);color:#fb7185;border:1px solid rgba(251,113,133,.35)');  fbEl.textContent=correct?'✓ Correct!':'✗ Not quite — moving on…';  el.appendChild(fbEl);}item.options.forEach(function(opt,oi){  var btn=document.createElement('button');  btn.style.cssText='display:block;width:100%;text-align:left;padding:11px 16px;border-radius:10px;margin:7px 0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:white;cursor:pointer;font-size:14px';  btn.textContent=opt;  btn.onmouseover=function(){btn.style.background='rgba(110,231,255,.1)';btn.style.borderColor='#6ee7ff'};  btn.onmouseout=function(){btn.style.background='rgba(255,255,255,.06)';btn.style.borderColor='rgba(255,255,255,.12)'};  btn.onclick=function(e){    e.stopPropagation();    if(dbGet('feedback',''))return;    var isCorrect=oi===item.answer;    if(isCorrect)dbInc('score',1);    dbSet('feedback',isCorrect?'correct':'wrong');    setTimeout(function(){dbSet('feedback','');dbSet('currentQ',dbGet('currentQ',0)+1);},900);  };  el.appendChild(btn);});"
+        },
+        {
+          "id": "w_q_chg",
+          "trigger": "event",
+          "eventName": "db:changed",
+          "mode": "js",
+          "code": "var el=machine.el;var qs=dbGet('questions',[]);var idx=dbGet('currentQ',0);var score=dbGet('score',0);if(!el)return;el.innerHTML='';var badge=document.createElement('span');badge.className='badge';badge.textContent=machine.name;el.appendChild(badge);if(idx>=qs.length){  var emoji=score===qs.length?'🏆':score>=qs.length/2?'👍':'😅';  var done=document.createElement('div');done.style.cssText='text-align:center;padding:28px 0';  done.innerHTML='<div style=\"font-size:56px;margin-bottom:12px\">'+emoji+'</div><div style=\"font-size:26px;font-weight:bold;color:#86efac\">'+score+' / '+qs.length+'</div><div style=\"color:#9da9c2;font-size:14px;margin-top:6px\">Quiz complete!</div>';  el.appendChild(done);  var restart=document.createElement('button');  restart.style.cssText='margin-top:18px;display:block;padding:12px 32px;border-radius:12px;background:linear-gradient(135deg,#0ea5e9,#7c3aed);border:0;color:white;cursor:pointer;font-size:15px;font-weight:bold';  restart.textContent='Play Again';  restart.onclick=function(e){e.stopPropagation();dbSet('score',0);dbSet('currentQ',0);dbSet('feedback','');};  el.appendChild(restart);  return;}var prog=document.createElement('div');prog.style.cssText='font-size:12px;color:#9da9c2;margin-bottom:10px';prog.textContent='Q '+(idx+1)+' of '+qs.length+'  •  Score: '+score;el.appendChild(prog);var barWrap=document.createElement('div');barWrap.style.cssText='height:4px;border-radius:2px;background:rgba(255,255,255,.1);margin-bottom:18px;overflow:hidden';var barFill=document.createElement('div');barFill.style.cssText='height:100%;background:linear-gradient(90deg,#0ea5e9,#7c3aed);width:'+Math.round((idx/qs.length)*100)+'%';barWrap.appendChild(barFill);el.appendChild(barWrap);var item=qs[idx];var qt=document.createElement('div');qt.style.cssText='font-size:17px;font-weight:bold;color:#ecf2ff;margin-bottom:16px;line-height:1.4';qt.textContent=item.q;el.appendChild(qt);var fb=dbGet('feedback','');if(fb){  var fbEl=document.createElement('div');  var correct=fb==='correct';  fbEl.style.cssText='padding:9px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;'+(correct?'background:rgba(134,239,172,.15);color:#86efac;border:1px solid rgba(134,239,172,.35)':'background:rgba(251,113,133,.15);color:#fb7185;border:1px solid rgba(251,113,133,.35)');  fbEl.textContent=correct?'✓ Correct!':'✗ Not quite — moving on…';  el.appendChild(fbEl);}item.options.forEach(function(opt,oi){  var btn=document.createElement('button');  btn.style.cssText='display:block;width:100%;text-align:left;padding:11px 16px;border-radius:10px;margin:7px 0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:white;cursor:pointer;font-size:14px';  btn.textContent=opt;  btn.onmouseover=function(){btn.style.background='rgba(110,231,255,.1)';btn.style.borderColor='#6ee7ff'};  btn.onmouseout=function(){btn.style.background='rgba(255,255,255,.06)';btn.style.borderColor='rgba(255,255,255,.12)'};  btn.onclick=function(e){    e.stopPropagation();    if(dbGet('feedback',''))return;    var isCorrect=oi===item.answer;    if(isCorrect)dbInc('score',1);    dbSet('feedback',isCorrect?'correct':'wrong');    setTimeout(function(){dbSet('feedback','');dbSet('currentQ',dbGet('currentQ',0)+1);},900);  };  el.appendChild(btn);});"
+        }
+      ],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    }
+  ],
+  "timeline": [],
+  "backend": {
+    "url": ""
+  }
+}

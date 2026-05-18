@@ -1,0 +1,442 @@
+{
+  "selectedId": null,
+  "db": {
+    "count": 0,
+    "step": 1
+  },
+  "events": [
+    {
+      "name": "app:boot",
+      "defaultPayload": {
+        "booted": true
+      }
+    },
+    {
+      "name": "db:changed",
+      "defaultPayload": {
+        "path": "",
+        "value": null
+      }
+    }
+  ],
+  "machines": [
+    {
+      "id": "root",
+      "name": "Counter App",
+      "tag": "section",
+      "parentId": null,
+      "text": "",
+      "attrs": {},
+      "styles": {
+        "padding": "40px 32px",
+        "borderRadius": "24px",
+        "background": "rgba(255,255,255,.04)",
+        "display": "flex",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "gap": "24px",
+        "maxWidth": "420px",
+        "margin": "0 auto"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_title",
+      "name": "Title",
+      "tag": "h1",
+      "parentId": "root",
+      "text": "Click Counter",
+      "attrs": {},
+      "styles": {
+        "margin": "0",
+        "fontSize": "26px",
+        "color": "#6ee7ff",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_display",
+      "name": "Count Display",
+      "tag": "div",
+      "parentId": "root",
+      "text": "0",
+      "attrs": {},
+      "styles": {
+        "fontSize": "96px",
+        "fontWeight": "bold",
+        "color": "#86efac",
+        "lineHeight": "1",
+        "textAlign": "center",
+        "minWidth": "160px",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#86efac",
+      "locked": false,
+      "dbBind": "count"
+    },
+    {
+      "id": "m_ctrl",
+      "name": "Controls",
+      "tag": "div",
+      "parentId": "root",
+      "text": "",
+      "attrs": {},
+      "styles": {
+        "display": "flex",
+        "gap": "14px",
+        "alignItems": "center",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_minus",
+      "name": "Minus",
+      "tag": "button",
+      "parentId": "m_ctrl",
+      "text": "−",
+      "attrs": {},
+      "styles": {
+        "fontSize": "28px",
+        "width": "58px",
+        "height": "58px",
+        "borderRadius": "50%",
+        "background": "rgba(251,113,133,.15)",
+        "border": "2px solid rgba(251,113,133,.5)",
+        "color": "#fb7185",
+        "cursor": "pointer",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [
+        {
+          "id": "w_minus",
+          "trigger": "click",
+          "eventName": "db:changed",
+          "mode": "js",
+          "code": "dbInc('count', -(dbGet('step',1)||1));"
+        }
+      ],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#fb7185",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_plus",
+      "name": "Plus",
+      "tag": "button",
+      "parentId": "m_ctrl",
+      "text": "+",
+      "attrs": {},
+      "styles": {
+        "fontSize": "28px",
+        "width": "58px",
+        "height": "58px",
+        "borderRadius": "50%",
+        "background": "rgba(110,231,255,.15)",
+        "border": "2px solid rgba(110,231,255,.5)",
+        "color": "#6ee7ff",
+        "cursor": "pointer",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [
+        {
+          "id": "w_plus",
+          "trigger": "click",
+          "eventName": "db:changed",
+          "mode": "js",
+          "code": "dbInc('count', dbGet('step',1)||1);"
+        }
+      ],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_reset",
+      "name": "Reset",
+      "tag": "button",
+      "parentId": "m_ctrl",
+      "text": "Reset",
+      "attrs": {},
+      "styles": {
+        "fontSize": "14px",
+        "padding": "10px 20px",
+        "borderRadius": "12px",
+        "background": "rgba(255,255,255,.06)",
+        "border": "1px solid rgba(255,255,255,.18)",
+        "color": "white",
+        "cursor": "pointer"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [
+        {
+          "id": "w_reset",
+          "trigger": "click",
+          "eventName": "db:changed",
+          "mode": "js",
+          "code": "dbSet('count', 0);"
+        }
+      ],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#9da9c2",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_step_row",
+      "name": "Step Row",
+      "tag": "div",
+      "parentId": "root",
+      "text": "",
+      "attrs": {},
+      "styles": {
+        "display": "flex",
+        "alignItems": "center",
+        "gap": "10px",
+        "background": "rgba(255,255,255,.04)",
+        "padding": "10px 18px",
+        "borderRadius": "12px"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_step_lbl",
+      "name": "Step Label",
+      "tag": "span",
+      "parentId": "m_step_row",
+      "text": "Step:",
+      "attrs": {},
+      "styles": {
+        "fontSize": "13px",
+        "color": "#9da9c2",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_step_in",
+      "name": "Step Input",
+      "tag": "input",
+      "parentId": "m_step_row",
+      "text": "",
+      "attrs": {
+        "type": "number",
+        "min": "1",
+        "max": "100"
+      },
+      "styles": {
+        "width": "64px",
+        "textAlign": "center",
+        "fontSize": "15px",
+        "padding": "7px"
+      },
+      "bind": {
+        "path": "step",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_hint",
+      "name": "Hint",
+      "tag": "p",
+      "parentId": "root",
+      "text": "Change the step size above, then click + / − to count by that amount.",
+      "attrs": {},
+      "styles": {
+        "fontSize": "12px",
+        "color": "#9da9c2",
+        "margin": "0",
+        "textAlign": "center",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    }
+  ],
+  "timeline": [],
+  "backend": {
+    "url": ""
+  }
+}

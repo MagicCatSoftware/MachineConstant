@@ -1,0 +1,402 @@
+{
+  "selectedId": null,
+  "db": {
+    "todos": [
+      {
+        "text": "Buy groceries",
+        "done": false
+      },
+      {
+        "text": "Read 30 pages",
+        "done": true
+      },
+      {
+        "text": "Go for a walk",
+        "done": false
+      }
+    ],
+    "newTodo": ""
+  },
+  "events": [
+    {
+      "name": "app:boot",
+      "defaultPayload": {
+        "booted": true
+      }
+    },
+    {
+      "name": "db:changed",
+      "defaultPayload": {
+        "path": "",
+        "value": null
+      }
+    },
+    {
+      "name": "todo:add",
+      "defaultPayload": {}
+    }
+  ],
+  "machines": [
+    {
+      "id": "root",
+      "name": "Todo App",
+      "tag": "section",
+      "parentId": null,
+      "text": "",
+      "attrs": {},
+      "styles": {
+        "padding": "28px",
+        "borderRadius": "24px",
+        "background": "rgba(255,255,255,.04)",
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "16px",
+        "maxWidth": "500px",
+        "margin": "0 auto"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_hdr",
+      "name": "Header",
+      "tag": "div",
+      "parentId": "root",
+      "text": "",
+      "attrs": {},
+      "styles": {
+        "display": "flex",
+        "justifyContent": "space-between",
+        "alignItems": "center",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_title",
+      "name": "Title",
+      "tag": "h2",
+      "parentId": "m_hdr",
+      "text": "Todo List",
+      "attrs": {},
+      "styles": {
+        "margin": "0",
+        "fontSize": "22px",
+        "color": "#ecf2ff",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_stats",
+      "name": "Stats",
+      "tag": "span",
+      "parentId": "m_hdr",
+      "text": "0 / 0 done",
+      "attrs": {},
+      "styles": {
+        "fontSize": "13px",
+        "color": "#9da9c2",
+        "background": "rgba(255,255,255,.07)",
+        "padding": "5px 12px",
+        "borderRadius": "999px"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [
+        {
+          "id": "w_stats_boot",
+          "trigger": "event",
+          "eventName": "app:boot",
+          "mode": "js",
+          "code": "var t=dbGet('todos',[]);machine.text(t.filter(function(x){return x.done}).length+' / '+t.length+' done');"
+        },
+        {
+          "id": "w_stats_chg",
+          "trigger": "event",
+          "eventName": "db:changed",
+          "mode": "js",
+          "code": "var t=dbGet('todos',[]);machine.text(t.filter(function(x){return x.done}).length+' / '+t.length+' done');"
+        }
+      ],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#86efac",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_input_row",
+      "name": "Input Row",
+      "tag": "div",
+      "parentId": "root",
+      "text": "",
+      "attrs": {},
+      "styles": {
+        "display": "flex",
+        "gap": "10px",
+        "padding": "0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_input",
+      "name": "New Todo",
+      "tag": "input",
+      "parentId": "m_input_row",
+      "text": "",
+      "attrs": {
+        "placeholder": "What needs to be done?"
+      },
+      "styles": {
+        "flex": "1",
+        "fontSize": "14px",
+        "padding": "11px 14px",
+        "borderRadius": "12px",
+        "background": "rgba(255,255,255,.06)",
+        "border": "1px solid rgba(255,255,255,.15)",
+        "color": "white"
+      },
+      "bind": {
+        "path": "newTodo",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_add",
+      "name": "Add",
+      "tag": "button",
+      "parentId": "m_input_row",
+      "text": "Add",
+      "attrs": {},
+      "styles": {
+        "padding": "11px 20px",
+        "borderRadius": "12px",
+        "background": "linear-gradient(135deg,#0ea5e9,#7c3aed)",
+        "border": "0",
+        "color": "white",
+        "cursor": "pointer",
+        "fontWeight": "bold"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [
+        {
+          "id": "w_add",
+          "trigger": "click",
+          "eventName": "todo:add",
+          "mode": "js",
+          "code": "var text=dbGet('newTodo','').trim();if(!text)return;var todos=dbGet('todos',[]);todos.push({text:text,done:false});dbSet('todos',todos);dbSet('newTodo','');"
+        }
+      ],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#0ea5e9",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_list",
+      "name": "Todo List",
+      "tag": "div",
+      "parentId": "root",
+      "text": "",
+      "attrs": {},
+      "styles": {
+        "minHeight": "80px",
+        "padding": "4px 0"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [
+        {
+          "id": "w_list_boot",
+          "trigger": "event",
+          "eventName": "app:boot",
+          "mode": "js",
+          "code": "var el=machine.el;var todos=dbGet('todos',[]);if(!el)return;el.innerHTML='';var badge=document.createElement('span');badge.className='badge';badge.textContent=machine.name;el.appendChild(badge);todos.forEach(function(t,i){  var row=document.createElement('div');  row.style.cssText='padding:10px 14px;border-radius:10px;margin:5px 0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px;cursor:pointer;'+(t.done?'opacity:.4;':'');  var icon=document.createElement('span');icon.style.cssText='font-size:17px;flex-shrink:0;color:'+(t.done?'#86efac':'#9da9c2');icon.textContent=t.done?'✓':'○';  var txt=document.createElement('span');txt.style.cssText='flex:1;font-size:14px;'+(t.done?'text-decoration:line-through;color:#9da9c2;':'color:white;');txt.textContent=t.text;  var del=document.createElement('button');del.style.cssText='background:transparent;border:none;color:#fb7185;cursor:pointer;font-size:15px;padding:2px 6px;flex-shrink:0';del.textContent='×';  del.onclick=function(e){e.stopPropagation();var ts=dbGet('todos',[]);ts.splice(i,1);dbSet('todos',ts);};  row.onclick=function(e){if(e.target===del)return;e.stopPropagation();var ts=dbGet('todos',[]);ts[i].done=!ts[i].done;dbSet('todos',ts);};  row.appendChild(icon);row.appendChild(txt);row.appendChild(del);el.appendChild(row);});if(!todos.length){  var empty=document.createElement('div');empty.style.cssText='color:#9da9c2;padding:14px;text-align:center;font-size:13px';  empty.textContent='No todos yet — add one above!';el.appendChild(empty);}"
+        },
+        {
+          "id": "w_list_chg",
+          "trigger": "event",
+          "eventName": "db:changed",
+          "mode": "js",
+          "code": "var el=machine.el;var todos=dbGet('todos',[]);if(!el)return;el.innerHTML='';var badge=document.createElement('span');badge.className='badge';badge.textContent=machine.name;el.appendChild(badge);todos.forEach(function(t,i){  var row=document.createElement('div');  row.style.cssText='padding:10px 14px;border-radius:10px;margin:5px 0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px;cursor:pointer;'+(t.done?'opacity:.4;':'');  var icon=document.createElement('span');icon.style.cssText='font-size:17px;flex-shrink:0;color:'+(t.done?'#86efac':'#9da9c2');icon.textContent=t.done?'✓':'○';  var txt=document.createElement('span');txt.style.cssText='flex:1;font-size:14px;'+(t.done?'text-decoration:line-through;color:#9da9c2;':'color:white;');txt.textContent=t.text;  var del=document.createElement('button');del.style.cssText='background:transparent;border:none;color:#fb7185;cursor:pointer;font-size:15px;padding:2px 6px;flex-shrink:0';del.textContent='×';  del.onclick=function(e){e.stopPropagation();var ts=dbGet('todos',[]);ts.splice(i,1);dbSet('todos',ts);};  row.onclick=function(e){if(e.target===del)return;e.stopPropagation();var ts=dbGet('todos',[]);ts[i].done=!ts[i].done;dbSet('todos',ts);};  row.appendChild(icon);row.appendChild(txt);row.appendChild(del);el.appendChild(row);});if(!todos.length){  var empty=document.createElement('div');empty.style.cssText='color:#9da9c2;padding:14px;text-align:center;font-size:13px';  empty.textContent='No todos yet — add one above!';el.appendChild(empty);}"
+        }
+      ],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#6ee7ff",
+      "locked": false,
+      "dbBind": ""
+    },
+    {
+      "id": "m_clear",
+      "name": "Clear Done",
+      "tag": "button",
+      "parentId": "root",
+      "text": "Clear Completed",
+      "attrs": {},
+      "styles": {
+        "padding": "9px 16px",
+        "borderRadius": "10px",
+        "background": "rgba(251,113,133,.1)",
+        "border": "1px solid rgba(251,113,133,.3)",
+        "color": "#fb7185",
+        "cursor": "pointer",
+        "fontSize": "13px",
+        "alignSelf": "flex-end"
+      },
+      "bind": {
+        "path": "",
+        "event": "db:changed"
+      },
+      "loop": {
+        "mode": "none",
+        "path": "",
+        "tag": "div",
+        "template": ""
+      },
+      "wires": [
+        {
+          "id": "w_clear",
+          "trigger": "click",
+          "eventName": "db:changed",
+          "mode": "js",
+          "code": "dbSet('todos',dbGet('todos',[]).filter(function(t){return !t.done}));"
+        }
+      ],
+      "state": {
+        "hidden": false,
+        "classes": []
+      },
+      "notes": "",
+      "color": "#fb7185",
+      "locked": false,
+      "dbBind": ""
+    }
+  ],
+  "timeline": [],
+  "backend": {
+    "url": ""
+  }
+}

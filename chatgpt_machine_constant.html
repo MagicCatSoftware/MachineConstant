@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Constant Builder V3 Stable Typing</title>
+<style>
+:root{--bg:#07090f;--panel:#101522;--panel2:#151c2d;--panel3:#1d263a;--text:#ecf2ff;--muted:#9da9c2;--line:#28334d;--accent:#6ee7ff;--danger:#fb7185;--good:#86efac;--mono:Consolas,Monaco,"Courier New",monospace;--sans:Inter,system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;height:100vh;overflow:hidden;font-family:var(--sans);color:var(--text);background:radial-gradient(circle at 20% 0%,rgba(110,231,255,.14),transparent 32%),var(--bg)}
+button,input,select,textarea{font:inherit}button{border:1px solid var(--line);background:var(--panel3);color:var(--text);border-radius:12px;padding:9px 12px;cursor:pointer}button:hover{border-color:var(--accent)}button.primary{background:linear-gradient(135deg,#0ea5e9,#7c3aed);border:0}button.good{background:rgba(134,239,172,.13);border-color:rgba(134,239,172,.45)}button.danger{background:rgba(251,113,133,.13);border-color:rgba(251,113,133,.45)}button.small{font-size:12px;padding:6px 8px}
+input,select,textarea{width:100%;background:#090d16;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px;outline:none}textarea{min-height:90px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.4}label{display:block;font-size:12px;color:var(--muted);margin:9px 0 5px}.hint{font-size:12px;color:var(--muted);line-height:1.45}.mono{font-family:var(--mono)}
+.app{display:grid;grid-template-columns:300px 1fr 450px;grid-template-rows:62px 1fr 165px;gap:10px;height:100vh;padding:10px}.topbar{grid-column:1/4;display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(16,21,34,.9);border:1px solid var(--line);border-radius:16px;padding:10px 12px}.brand h1{font-size:16px;margin:0}.brand p{font-size:12px;color:var(--muted);margin:2px 0 0}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.panel{background:rgba(16,21,34,.93);border:1px solid var(--line);border-radius:16px;overflow:hidden;min-height:0}.panelHeader{height:48px;display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid var(--line);background:rgba(21,28,45,.9)}.panelHeader h2{font-size:14px;margin:0}.panelBody{height:calc(100% - 48px);overflow:auto;padding:12px}.left{grid-column:1;grid-row:2}.center{grid-column:2;grid-row:2}.right{grid-column:3;grid-row:2}.bottom{grid-column:1/4;grid-row:3}.canvasWrap{height:calc(100% - 48px);padding:12px;overflow:auto}.canvas{min-height:100%;border:1px dashed rgba(110,231,255,.36);border-radius:16px;padding:22px;background:rgba(4,7,13,.92)}
+.machine-node{position:relative;outline:1px solid rgba(110,231,255,.18);outline-offset:2px;min-height:28px}.machine-node:hover{outline-color:var(--accent)}.machine-node.selected{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(110,231,255,.12)}.mc-hidden{display:none!important}.badge{position:absolute;top:-13px;left:8px;font:10px var(--mono);background:#04111b;color:var(--accent);border:1px solid rgba(110,231,255,.35);border-radius:999px;padding:2px 6px;pointer-events:none;z-index:2}
+.treeItem{display:flex;justify-content:space-between;gap:8px;padding:7px 8px;margin:4px 0;border:1px solid transparent;border-radius:10px;cursor:pointer;color:var(--muted);background:rgba(255,255,255,.02)}.treeItem:hover,.treeItem.active{color:var(--text);border-color:var(--accent);background:rgba(110,231,255,.08)}.pill{font:10px var(--mono);color:var(--accent);background:rgba(110,231,255,.08);border:1px solid rgba(110,231,255,.22);border-radius:999px;padding:3px 6px}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.tab{font-size:12px;padding:7px 9px}.tab.active{border-color:var(--accent);background:rgba(110,231,255,.1)}.section{display:none}.section.active{display:block}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.divider{height:1px;background:var(--line);margin:12px 0}.card{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025);padding:10px;margin-bottom:8px}.cardTop{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}.logList{height:calc(100% - 48px);overflow:auto;padding:10px 12px 32px;font:12px var(--mono);color:#dbeafe}.logLine{border-bottom:1px solid rgba(255,255,255,.06);padding:4px 0}.empty{color:var(--muted);font-size:13px;padding:12px;border:1px dashed var(--line);border-radius:12px}.exportOverlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:50;display:none;align-items:center;justify-content:center;padding:20px}.exportBox{width:min(980px,96vw);height:min(760px,92vh);background:#101522;border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;overflow:hidden}.exportHead{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid var(--line)}.exportText{flex:1;border:0;border-radius:0;background:#050812;color:#dbeafe;font:12px var(--mono);padding:14px;resize:none}
+/* ──── FEATURE ADDITIONS ──── */
+.searchBox{width:100%;padding:7px 10px;background:#090d16;color:var(--text);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;font:13px var(--sans);outline:none;box-sizing:border-box}
+.searchBox:focus{border-color:var(--accent)}
+.treeActions{display:flex;gap:3px;align-items:center;flex-shrink:0}
+.treeEye{font-size:12px;padding:2px 4px;background:transparent;border:none;color:var(--muted);cursor:pointer;border-radius:5px;line-height:1}
+.treeEye:hover{color:var(--accent)}
+.treeWires{font:9px var(--mono);color:var(--muted);background:rgba(255,255,255,.07);border-radius:999px;padding:2px 5px}
+.treeCollapse{font-size:9px;width:14px;text-align:center;padding:0;background:transparent;border:none;color:var(--muted);cursor:pointer;flex-shrink:0;line-height:1}
+.treeCollapse:hover{color:var(--accent)}
+.colDot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;border:1px solid rgba(255,255,255,.2)}
+.statusBar{position:fixed;bottom:0;left:0;right:0;height:26px;background:#07090f;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 14px;font:11px var(--mono);color:var(--muted);z-index:40}
+.statusGreen{color:var(--good)}
+.evCount{font:10px var(--mono);color:var(--good);background:rgba(134,239,172,.1);border-radius:999px;padding:1px 7px;border:1px solid rgba(134,239,172,.2);margin-left:4px}
+.presetGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:6px 0 4px}
+.presetBtn{font-size:11px;padding:4px 6px;border-radius:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zoomLabel{font-size:11px;color:var(--muted);min-width:36px;text-align:center;display:inline-block}
+
+@media(max-width:1150px){body{overflow:auto}.app{height:auto;grid-template-columns:1fr;grid-template-rows:auto}.topbar,.left,.center,.right,.bottom{grid-column:1;grid-row:auto}.panel{min-height:320px}.center{min-height:540px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar"><div class="brand"><h1>Machine Constant Builder V4</h1><p>Stable typing + undo/redo + local save + templates + timeline + backend adapter + wire map.</p></div><div class="toolbar"><button class="primary" id="addMachineBtn">+ Machine</button><button id="undoBtn">Undo</button><button id="redoBtn">Redo</button><button id="localSaveBtn">Save Local</button><button id="localLoadBtn">Load Local</button><button id="saveJsonBtn">Save JSON</button><button id="importJsonBtn">Import JSON</button><input id="jsonFileInput" type="file" accept="application/json,.json" style="display:none"><button id="exportHtmlBtn">Export HTML</button><button class="danger" id="resetBtn">Reset</button></div></header>
+<aside class="panel left"><div class="panelHeader"><h2>DOM Tree</h2><span class="pill" id="nodeCount">0</span></div><div class="panelBody"><input class="searchBox" id="treeSearch" placeholder="🔍 Search machines…" oninput="renderTree()"><div id="tree"></div></div></aside>
+<main class="panel center"><div class="panelHeader"><h2>Canvas</h2><div class="toolbar"><button class="small" id="bootBtn">Run Boot</button><button class="small" id="refreshBtn">Refresh Canvas</button><button class="small" id="clearSelBtn">Clear</button><span style="width:1px;background:var(--line);height:14px;margin:0 2px;display:inline-block"></span><button class="small" id="zoomOutBtn" title="Ctrl+−">−</button><span class="zoomLabel" id="zoomLabel">100%</span><button class="small" id="zoomInBtn" title="Ctrl+=">+</button><button class="small" id="zoomResetBtn" title="Ctrl+0">↺</button></div></div><div class="canvasWrap"><div id="canvas" class="canvas"></div></div></main>
+<aside class="panel right"><div class="panelHeader"><h2>Inspector</h2><span class="pill" id="selectedPill">none</span></div><div class="panelBody">
+<div class="tabs"><button class="tab active" data-tab="machine">Machine</button><button class="tab" data-tab="events">Events</button><button class="tab" data-tab="templates">Templates</button><button class="tab" data-tab="timeline">Timeline</button><button class="tab" data-tab="backend">Backend</button><button class="tab" data-tab="wires">Wire Map</button><button class="tab" data-tab="db">DB</button><button class="tab" data-tab="map">Map</button></div>
+<section class="section active" id="tab-machine"><div id="noSelection" class="empty">Select or create a machine.</div><div id="machineEditor" style="display:none">
+<div class="row"><div><label>Name</label><input id="mName"></div><div><label>Tag</label><select id="mTag"><option>div</option><option>section</option><option>button</option><option>input</option><option>textarea</option><option>h1</option><option>h2</option><option>p</option><option>span</option><option>ul</option><option>li</option><option>img</option><option>a</option></select></div></div>
+<label>Text / Template</label><textarea id="mText"></textarea><label>Attributes JSON</label><textarea id="mAttrs"></textarea><label>Styles JSON</label><textarea id="mStyles"></textarea><div class="row" style="margin-top:8px"><div><label>Notes</label><textarea id="mNotes" style="min-height:50px" placeholder="Private notes…"></textarea></div><div><label>Accent Color</label><input type="color" id="mColor" value="#6ee7ff" style="height:36px;padding:3px;width:100%"><div style="margin-top:8px;display:flex;align-items:center;gap:7px"><input type="checkbox" id="mLocked" style="width:auto;margin:0"><label style="margin:0;font-size:12px;color:var(--muted)">Locked</label></div></div></div>
+<div class="divider"></div><div class="row"><div><label>DB Bind Path</label><input id="mBindPath" placeholder="form.name"></div><div><label>Emit On Input</label><input id="mBindEvent" placeholder="db:changed"></div></div>
+<div class="divider"></div><div><label>Live DB Value Path</label><input id="mDbBind" placeholder="cartCount"><p class="hint">Machine text updates live whenever this DB path changes — no wire needed.</p></div><div class="divider"></div><div class="row"><div><label>Loop Mode</label><select id="mLoopMode"><option value="none">none</option><option value="children">children</option><option value="self">self</option></select></div><div><label>Loop DB Path</label><input id="mLoopPath" placeholder="products"></div></div><label>Loop Tag</label><input id="mLoopTag" placeholder="button"><label>Loop Template</label><textarea id="mLoopTemplate" placeholder="{{name}}"></textarea>
+<div class="divider"></div><div class="row"><button class="good" id="applyMachineBtn">Apply Machine</button><button id="addChildBtn">Add Child</button></div><div class="row" style="margin-top:8px"><button id="duplicateBtn">Duplicate</button><button class="danger" id="deleteBtn">Delete</button></div><div class="row" style="margin-top:8px"><button id="moveUpBtn">Move Up</button><button id="moveDownBtn">Move Down</button></div><div class="row" style="margin-top:8px"><button id="outdentBtn">Move To Root</button><button id="wrapBtn">Wrap In Div</button></div>
+<div class="divider"></div><h3 style="font-size:14px;margin:0 0 4px">Quick Style Presets</h3><div class="presetGrid"><button class="presetBtn small" onclick="applyStylePreset('flex-col')">Flex Col</button><button class="presetBtn small" onclick="applyStylePreset('flex-row')">Flex Row</button><button class="presetBtn small" onclick="applyStylePreset('grid-2')">Grid 2</button><button class="presetBtn small" onclick="applyStylePreset('card')">Card</button><button class="presetBtn small" onclick="applyStylePreset('hero')">Hero</button><button class="presetBtn small" onclick="applyStylePreset('center')">Center</button><button class="presetBtn small" onclick="applyStylePreset('badge-s')">Badge</button><button class="presetBtn small" onclick="applyStylePreset('chip')">Chip</button><button class="presetBtn small" onclick="applyStylePreset('clear')">✕ Clear</button></div><div class="divider"></div><h3 style="font-size:14px;margin:0 0 8px">Wires</h3><p class="hint">Wire typing is stored directly. No redraw happens while typing.</p><div id="wireList"></div><button id="addJsWireBtn">+ JS Wire</button><button id="addCmdWireBtn">+ Command Wire</button>
+</div></section>
+<section class="section" id="tab-events"><label>Event Name</label><input id="newEventName" placeholder="cart:add"><label>Default Payload JSON</label><textarea id="newEventPayload">{}</textarea><button class="good" id="addEventBtn">Add Event</button><div class="divider"></div><div id="eventList"></div></section>
+<section class="section" id="tab-templates"><p class="hint">Reusable machine templates. Select a template and add it to the selected machine or root.</p><label>Template</label><select id="templateSelect"><option value="card">Card</option><option value="button">Event Button</option><option value="form">DB Form</option><option value="list">DB Loop List</option><option value="panel">Toggle Panel</option></select><button class="good" id="addTemplateBtn">Add Template</button><div class="divider"></div><div class="empty">Templates are stored in code now. Later these can be saved into the JSON map.</div></section>
+<section class="section" id="tab-timeline"><p class="hint">Schedule events inside the app. These use setTimeout while the builder is open.</p><div class="row"><div><label>Delay MS</label><input id="timelineDelay" value="1000"></div><div><label>Event Name</label><input id="timelineEvent" value="app:boot"></div></div><label>Payload JSON</label><textarea id="timelinePayload">{}</textarea><button class="good" id="addTimelineBtn">Add Scheduled Event</button><button id="runTimelineBtn">Run Timeline</button><div class="divider"></div><div id="timelineList"></div></section>
+<section class="section" id="tab-backend"><p class="hint">Backend adapter. Use this later with a real REST API. For now it can push/pull JSON to an endpoint you control.</p><label>Base URL</label><input id="backendUrl" placeholder="https://example.com/api/machine-map"><div class="row"><button id="pullBackendBtn">Pull Map</button><button id="pushBackendBtn">Push Map</button></div><div class="divider"></div><div class="empty">Expected API: GET returns app map JSON. POST accepts app map JSON.</div></section>
+<section class="section" id="tab-wires"><p class="hint">Visual wire map: source machine → event → listener machine.</p><button id="refreshWireMapBtn">Refresh Wire Map</button><div class="divider"></div><div id="wireMap"></div></section>
+<section class="section" id="tab-db"><label>DB JSON</label><textarea id="dbEditor" style="min-height:360px"></textarea><button class="good" id="applyDbBtn">Apply DB JSON</button></section>
+<section class="section" id="tab-map"><label>Map JSON</label><textarea id="mapViewer" readonly style="min-height:390px"></textarea></section>
+</div></aside>
+<section class="panel bottom"><div class="panelHeader"><h2>Log</h2><button class="small" id="clearLogBtn">Clear</button></div><div id="log" class="logList"></div></section>
+</div>
+<div class="statusBar"><span class="statusGreen">●</span><span id="sbMachines">0 machines</span><span>·</span><span id="sbEvents">0 fired</span><span>·</span><span id="sbLastEvent">ready</span><span style="flex:1"></span><span style="opacity:.35">Ctrl+S · Ctrl+Z/Y · Ctrl+D · Del · Ctrl+scroll zoom</span></div>
+<div class="exportOverlay" id="exportOverlay"><div class="exportBox"><div class="exportHead"><strong id="exportTitle">Export</strong><div class="toolbar"><button class="small good" id="copyExportBtn">Copy</button><button class="small" id="downloadExportBtn">Try Download</button><button class="small danger" id="closeExportBtn">Close</button></div></div><textarea id="exportText" class="exportText"></textarea></div></div>
+<script>
+const uid=()=>"m_"+Math.random().toString(36).slice(2,9);
+const clone=v=>JSON.parse(JSON.stringify(v));
+const pathGet=(o,p,f)=>!p?o:String(p).split('.').reduce((a,k)=>a&&a[k]!==undefined?a[k]:f,o);
+const pathSet=(o,p,v)=>{const parts=String(p).split('.');let c=o;parts.slice(0,-1).forEach(k=>{if(!c[k]||typeof c[k]!=='object')c[k]={};c=c[k]});c[parts[parts.length-1]]=v};
+const parseJson=(txt,fallback)=>{try{return String(txt||'').trim()?JSON.parse(txt):fallback}catch(e){alert('Invalid JSON: '+e.message);return fallback}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function template(txt,data){let s=String(txt??''),out='',i=0;while(true){let a=s.indexOf('{{',i);if(a<0){out+=s.slice(i);break}let b=s.indexOf('}}',a+2);if(b<0){out+=s.slice(i);break}out+=s.slice(i,a);let key=s.slice(a+2,b).trim();let v=pathGet(data,key,undefined);if(v===undefined)v=pathGet(app.db,key,'');out+=v==null?'':String(v);i=b+2}return out}
+function machine(parentId,patch={}){return Object.assign({id:uid(),name:'Machine',tag:'div',parentId,text:'New Machine',attrs:{},styles:{padding:'12px',borderRadius:'12px',background:'rgba(255,255,255,.08)'},bind:{path:'',event:'db:changed'},loop:{mode:'none',path:'',tag:'div',template:''},wires:[],state:{hidden:false,classes:[]},notes:'',color:'#6ee7ff',dbBind:'',locked:false},patch)}
+function starter(){return{selectedId:null,db:{appName:'Machine Store Demo',cartCount:0,form:{name:''},products:[{id:'p1',name:'Blue Chair',price:35},{id:'p2',name:'Red Lamp',price:22},{id:'p3',name:'Green Table',price:90}]},events:[{name:'app:boot',defaultPayload:{booted:true}},{name:'db:changed',defaultPayload:{path:'',value:null}},{name:'product:clicked',defaultPayload:{}},{name:'cart:add',defaultPayload:{qty:1}}],machines:[machine(null,{id:'root',name:'App Root',tag:'section',text:'',styles:{padding:'22px',borderRadius:'22px',background:'rgba(255,255,255,.08)',display:'grid',gap:'14px'}}),machine('root',{id:'title',name:'Title',tag:'h1',text:'{{appName}}',styles:{margin:'0'},wires:[{id:uid(),trigger:'event',eventName:'app:boot',mode:'js',code:"machine.text(db.appName + ' is online');"}]}),machine('root',{id:'nameInput',name:'Name Input',tag:'input',attrs:{placeholder:'Type name'},bind:{path:'form.name',event:'db:changed'}}),machine('root',{id:'namePreview',name:'Name Preview',tag:'p',text:'Name: {{form.name}}',wires:[{id:uid(),trigger:'event',eventName:'db:changed',mode:'js',code:"if(payload.path==='form.name') machine.text('Name: '+payload.value);"}]}),machine('root',{id:'details',name:'Details',tag:'div',text:'Click a product.',styles:{padding:'14px',borderRadius:'14px',background:'rgba(110,231,255,.10)'}}),machine('root',{id:'productList',name:'Product Loop',tag:'div',text:'',styles:{display:'grid',gap:'10px'},loop:{mode:'children',path:'products',tag:'button',template:'{{name}} - price {{price}}'},wires:[{id:uid(),trigger:'click',eventName:'product:clicked',mode:'js',code:"if(payload.loopData){ target('details').text('Selected: '+payload.loopData.name); emit('cart:add',{qty:1}); }"}]}),machine('root',{id:'cart',name:'Cart',tag:'p',text:'Cart: {{cartCount}}',wires:[{id:uid(),trigger:'event',eventName:'cart:add',mode:'js',code:"dbInc('cartCount',payload.qty||1); machine.text('Cart: '+dbGet('cartCount'));"}]})]}}
+let app=starter();const els=new Map();let currentExport={name:'',type:'',content:''};let undoStack=[],redoStack=[];let emitCounts={};let collapsedNodes=new Set();let zoomPct=100;
+function snapshot(){undoStack.push(JSON.stringify(app));if(undoStack.length>60)undoStack.shift();redoStack=[]}
+function restoreFrom(json){app=JSON.parse(json);renderCanvas();loadInspector();renderEvents();renderTimeline();renderWireMap();syncPanels()}
+function undo(){if(!undoStack.length)return;redoStack.push(JSON.stringify(app));restoreFrom(undoStack.pop())}
+function redo(){if(!redoStack.length)return;undoStack.push(JSON.stringify(app));restoreFrom(redoStack.pop())}
+function ensureExtras(){app.timeline=app.timeline||[];app.backend=app.backend||{url:''}}
+ensureExtras();
+const byId=id=>app.machines.find(m=>m.id===id);const childrenOf=id=>app.machines.filter(m=>m.parentId===id);function log(msg){appLog.unshift({t:new Date().toLocaleTimeString(),m:String(msg)});appLog=appLog.slice(0,100);renderLog()}let appLog=[];
+function target(idOrDef,elOverride){const def=typeof idOrDef==='string'?byId(idOrDef):idOrDef;if(!def)return null;const el=elOverride||els.get(def.id);let api={def,el,id:def.id,name:def.name,hide(){def.state.hidden=true;if(el)el.classList.add('mc-hidden');return api},show(){def.state.hidden=false;if(el)el.classList.remove('mc-hidden');return api},toggle(){def.state.hidden=!def.state.hidden;if(el)el.classList.toggle('mc-hidden',def.state.hidden);return api},text(v){def.text=String(v??'');if(el&&!['input','textarea','img'].includes(def.tag)){paint(el,def)}syncPanels();return api},style(k,v){def.styles[k]=v;if(el)el.style[k]=v;syncPanels();return api},emit(n,p){emit(n,p,def.id);return api},dbGet:(p,f)=>pathGet(app.db,p,f),dbSet(p,v){pathSet(app.db,p,v);emit('db:changed',{path:p,value:v},def.id);syncPanels();return api}};return api}
+function emit(name,payload={},source='system'){emitCounts[name]=(emitCounts[name]||0)+1;let ev=app.events.find(e=>e.name===name);let p=Object.assign({},ev?.defaultPayload||{},payload);log('EMIT '+name+' '+JSON.stringify(p));app.machines.forEach(m=>(m.wires||[]).filter(w=>w.trigger==='event'&&w.eventName===name).forEach(w=>runWire(m,w,name,p,els.get(m.id))));if(name==='db:changed'){app.machines.forEach(function(m){if(!m.dbBind)return;var val=pathGet(app.db,m.dbBind,'');var el=els.get(m.id);if(el&&!['input','textarea','img'].includes(m.tag)){el.textContent=String(val);var b=document.createElement('span');b.className='badge';b.textContent=m.name;el.prepend(b)}})}let sbL=document.getElementById('sbLastEvent');if(sbL)sbL.textContent='last: '+name;syncPanels()}
+function runWire(def,wire,eventName,payload,el){if(wire.mode==='commands'){(wire.commands||[]).forEach(c=>runCommand(def,c,payload,el));return}let machineApi=target(def,el),db=app.db,events=app.events,machines=app.machines,domTree=[],emitFn=(n,p)=>emit(n,p,def.id),targetFn=id=>target(id),all=()=>app.machines.map(m=>target(m.id)),dbGet=(p,f)=>pathGet(app.db,p,f),dbSet=(p,v)=>{pathSet(app.db,p,v);emit('db:changed',{path:p,value:v},def.id)},dbInc=(p,a=1)=>{pathSet(app.db,p,Number(pathGet(app.db,p,0))+Number(a));syncPanels()},dbPush=(p,v)=>{let arr=pathGet(app.db,p,[]);if(Array.isArray(arr))arr.push(v);syncPanels()},dbToggle=p=>{pathSet(app.db,p,!pathGet(app.db,p,false));syncPanels()};try{new Function('payload','eventName','machine','db','events','machines','domTree','emit','target','all','log','dbGet','dbSet','dbPush','dbInc','dbToggle',wire.code)(payload,eventName,machineApi,db,events,machines,domTree,emitFn,targetFn,all,log,dbGet,dbSet,dbPush,dbInc,dbToggle)}catch(e){log('WIRE ERROR '+e.message)}}
+function runCommand(def,c,payload,el){let data=Object.assign({},app.db,payload||{},payload?.loopData||{}),t=c.targetId==='$self'?target(def,el):target(template(c.targetId||'$self',data)),v=template(c.value||'',data);if(c.command==='hide')t?.hide();else if(c.command==='show')t?.show();else if(c.command==='toggle')t?.toggle();else if(c.command==='text')t?.text(v);else if(c.command==='style')t?.style(c.key,v);else if(c.command==='emit')emit(c.eventName||v,parseJson(c.payloadJson,{}),def.id);else if(c.command==='dbSet'){pathSet(app.db,c.path,parseJson(c.payloadJson,v));syncPanels()}else if(c.command==='dbInc'){pathSet(app.db,c.path,Number(pathGet(app.db,c.path,0))+Number(v||1));syncPanels()}else if(c.command==='log')log(v)}
+function paint(el,def,data=app.db){el.textContent=template(def.text,data);let b=document.createElement('span');b.className='badge';b.textContent=def.name;el.prepend(b)}
+function makeEl(def,row=null,index=null){let el=document.createElement(def.tag||'div');el.className='machine-node';el.dataset.id=def.id;if(app.selectedId===def.id)el.classList.add('selected');if(def.state.hidden)el.classList.add('mc-hidden');(def.state.classes||[]).forEach(c=>el.classList.add(c));Object.assign(el.style,def.styles||{});Object.entries(def.attrs||{}).forEach(([k,v])=>el.setAttribute(k,template(v,app.db)));let data=Object.assign({},app.db,row||{},{$index:index});if(['input','textarea'].includes(def.tag)){el.value=pathGet(app.db,def.bind.path,def.attrs.value||def.text||'');el.addEventListener('input',e=>{if(def.bind.path){pathSet(app.db,def.bind.path,e.target.value);emit(def.bind.event||'db:changed',{path:def.bind.path,value:e.target.value,machineId:def.id},def.id)}})}else if(def.tag!=='img'){paint(el,def,data)}el.addEventListener('click',e=>{e.stopPropagation();selectOnly(def.id);let payload={machineId:def.id,name:def.name,loopData:row,loopIndex:index,value:el.value||el.textContent};(def.wires||[]).filter(w=>w.trigger==='click').forEach(w=>runWire(def,w,'click',payload,el))});let loop=def.loop||{};let arr=pathGet(app.db,loop.path,[]);if(loop.mode==='children'&&Array.isArray(arr)){arr.forEach((r,i)=>{let c=document.createElement(loop.tag||'div');c.className='machine-node';c.style.padding='12px';c.style.borderRadius='12px';c.style.background='rgba(110,231,255,.10)';c.textContent=template(loop.template||'{{name}}',Object.assign({},app.db,r,{$index:i}));c.onclick=e=>{e.stopPropagation();selectOnly(def.id);let payload={machineId:def.id,loopData:r,loopIndex:i,value:c.textContent};(def.wires||[]).filter(w=>w.trigger==='click').forEach(w=>runWire(def,w,'click',payload,c))};el.appendChild(c)})}els.set(def.id,el);return el}
+function renderMachine(def,parent){let loop=def.loop||{},arr=pathGet(app.db,loop.path,[]);if(loop.mode==='self'&&Array.isArray(arr)){arr.forEach((r,i)=>{let d=clone(def);d.text=loop.template||def.text;d.tag=loop.tag||def.tag;d.loop={mode:'none'};parent.appendChild(makeEl(d,r,i))});return}let el=makeEl(def);parent.appendChild(el);childrenOf(def.id).forEach(ch=>renderMachine(ch,el))}
+function renderCanvas(){els.clear();canvas.innerHTML='';app.machines.filter(m=>!m.parentId).forEach(m=>renderMachine(m,canvas));renderTree();syncPanels()}
+function renderTree(){
+  var q=(document.getElementById('treeSearch')?.value||'').toLowerCase().trim();
+  var out=[];
+  function hasMatch(id){return childrenOf(id).some(function(c){return c.name.toLowerCase().includes(q)||c.tag.toLowerCase().includes(q)||hasMatch(c.id)})}
+  function walk(pid,d){childrenOf(pid).forEach(function(m){
+    var vis=!q||m.name.toLowerCase().includes(q)||m.tag.toLowerCase().includes(q)||(q&&hasMatch(m.id));
+    if(vis)out.push({m:m,d:d});
+    if(!collapsedNodes.has(m.id)||q)walk(m.id,d+1);
+  })}
+  walk(null,0);
+  nodeCount.textContent=app.machines.length+' nodes';
+  tree.innerHTML='';
+  out.forEach(function(entry){
+    var m=entry.m,d=entry.d;
+    var kids=childrenOf(m.id).length>0;
+    var wc=(m.wires||[]).length;
+    var col=m.color||'#6ee7ff';
+    var collapsed=collapsedNodes.has(m.id);
+    var item=document.createElement('div');
+    item.className='treeItem'+(app.selectedId===m.id?' active':'');
+    item.innerHTML=
+      '<span style="padding-left:'+(d*16)+'px;display:inline-flex;align-items:center;gap:4px;flex:1;min-width:0">'+
+      (kids?'<button class="treeCollapse" title="Collapse/expand">'+(collapsed?'▶':'▼')+'</button>':'')+
+      '<span class="colDot" style="background:'+col+'"></span>'+
+      '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.name)+(m.locked?' 🔒':'')+'</span>'+
+      '</span>'+
+      '<div class="treeActions">'+
+      (wc?'<span class="treeWires">'+wc+'w</span>':'')+
+      '<span class="pill">'+esc(m.tag)+'</span>'+
+      '<button class="treeEye" title="Toggle visibility">'+(m.state.hidden?'○':'◉')+'</button>'+
+      '</div>';
+    var collapseBtn=item.querySelector('.treeCollapse');
+    if(collapseBtn)collapseBtn.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(collapsedNodes.has(m.id))collapsedNodes.delete(m.id);else collapsedNodes.add(m.id);
+      renderTree();
+    });
+    var eyeBtn=item.querySelector('.treeEye');
+    if(eyeBtn)eyeBtn.addEventListener('click',function(e){
+      e.stopPropagation();
+      m.state.hidden=!m.state.hidden;
+      var el=els.get(m.id);if(el)el.classList.toggle('mc-hidden',m.state.hidden);
+      renderTree();
+    });
+    item.addEventListener('dblclick',function(e){
+      if(e.target.closest('.treeCollapse,.treeEye'))return;
+      if(m.locked){alert('Machine is locked.');return}
+      var nm=prompt('Rename:',m.name);
+      if(nm&&nm.trim()){snapshot();m.name=nm.trim();renderTree();if(app.selectedId===m.id)loadInspector();}
+    });
+    item.addEventListener('click',function(e){if(!e.target.closest('.treeCollapse,.treeEye'))selectMachine(m.id);});
+    tree.appendChild(item);
+  });
+}
+function renderLog(){document.getElementById('log').innerHTML=appLog.map(x=>'<div class="logLine"><span class="mono">'+x.t+'</span> '+esc(x.m)+'</div>').join('')}
+function selectOnly(id){app.selectedId=id;document.querySelectorAll('.machine-node.selected').forEach(e=>e.classList.remove('selected'));document.querySelectorAll('[data-id="'+CSS.escape(id)+'"]').forEach(e=>e.classList.add('selected'));selectedPill.textContent=id;renderTree()}
+function selectMachine(id){app.selectedId=id;selectedPill.textContent=id;loadInspector();renderTree();document.querySelectorAll('.machine-node.selected').forEach(e=>e.classList.remove('selected'));document.querySelectorAll('[data-id="'+CSS.escape(id)+'"]').forEach(e=>e.classList.add('selected'))}
+function loadInspector(){let s=byId(app.selectedId);noSelection.style.display=s?'none':'block';machineEditor.style.display=s?'block':'none';if(!s)return;mName.value=s.name||'';mTag.value=s.tag||'div';mText.value=s.text||'';mAttrs.value=JSON.stringify(s.attrs||{},null,2);mStyles.value=JSON.stringify(s.styles||{},null,2);mBindPath.value=s.bind?.path||'';mBindEvent.value=s.bind?.event||'db:changed';mLoopMode.value=s.loop?.mode||'none';mLoopPath.value=s.loop?.path||'';mLoopTag.value=s.loop?.tag||'div';mLoopTemplate.value=s.loop?.template||'';var mN=document.getElementById('mNotes'),mC=document.getElementById('mColor'),mLk=document.getElementById('mLocked');if(mN)mN.value=s.notes||'';if(mC)mC.value=s.color||'#6ee7ff';if(mLk)mLk.checked=!!s.locked;var mDb=document.getElementById('mDbBind');if(mDb)mDb.value=s.dbBind||'';renderWires(s);syncPanels()}
+function applyInspector(){let s=byId(app.selectedId);if(!s)return;s.name=mName.value;s.tag=mTag.value;s.text=mText.value;s.attrs=parseJson(mAttrs.value,s.attrs||{});s.styles=parseJson(mStyles.value,s.styles||{});s.bind={path:mBindPath.value,event:mBindEvent.value||'db:changed'};s.loop={mode:mLoopMode.value,path:mLoopPath.value,tag:mLoopTag.value||'div',template:mLoopTemplate.value};var mN2=document.getElementById('mNotes'),mC2=document.getElementById('mColor'),mLk2=document.getElementById('mLocked');if(mN2)s.notes=mN2.value;if(mC2)s.color=mC2.value;if(mLk2)s.locked=mLk2.checked;var mDb2=document.getElementById('mDbBind');if(mDb2)s.dbBind=mDb2.value;renderCanvas()}
+function renderWires(s){wireList.innerHTML='';(s.wires||[]).forEach((w,i)=>{let card=document.createElement('div');card.className='card';let opts=app.events.map(e=>'<option '+(w.eventName===e.name?'selected':'')+'>'+esc(e.name)+'</option>').join('');card.innerHTML='<div class="cardTop"><strong>Wire '+(i+1)+'</strong><button class="small danger" data-del>Delete</button></div><div class="row"><div><label>Trigger</label><select data-trigger><option value="click">click</option><option value="event">event</option></select></div><div><label>Mode</label><select data-mode><option value="js">JavaScript</option><option value="commands">Commands</option></select></div></div><label>Event</label><select data-event>'+opts+'</select><div data-js><label>JS Code</label><textarea data-code spellcheck="false"></textarea></div><div data-cmds></div><button class="small" data-addcmd>+ Command</button>';wireList.appendChild(card);card.querySelector('[data-trigger]').value=w.trigger||'click';card.querySelector('[data-mode]').value=w.mode||'js';card.querySelector('[data-code]').value=w.code||'';card.querySelector('[data-trigger]').onchange=e=>{w.trigger=e.target.value;syncPanels()};card.querySelector('[data-mode]').onchange=e=>{w.mode=e.target.value;syncPanels()};card.querySelector('[data-event]').onchange=e=>{w.eventName=e.target.value;syncPanels()};card.querySelector('[data-code]').addEventListener('input',e=>{w.code=e.target.value;syncPanels()});card.querySelector('[data-del]').onclick=()=>{s.wires.splice(i,1);renderWires(s);syncPanels()};card.querySelector('[data-addcmd]').onclick=()=>{w.mode='commands';w.commands=w.commands||[];w.commands.push({command:'toggle',targetId:'$self',key:'',value:'',path:'',eventName:'',payloadJson:'{}'});renderWires(s)};renderCmdRows(card.querySelector('[data-cmds]'),w,s)})}
+function renderCmdRows(box,w,s){box.innerHTML='';(w.commands||[]).forEach((c,i)=>{let d=document.createElement('div');d.className='card';d.innerHTML='<div class="cardTop"><strong>Command '+(i+1)+'</strong><button class="small danger" data-del>Delete</button></div><div class="row"><div><label>Command</label><select data-command><option>hide</option><option>show</option><option>toggle</option><option>text</option><option>style</option><option>emit</option><option>dbSet</option><option>dbInc</option><option>log</option></select></div><div><label>Target</label><input data-target></div></div><div class="row"><div><label>Key</label><input data-key></div><div><label>Value</label><input data-value></div></div><div class="row"><div><label>DB Path</label><input data-path></div><div><label>Event</label><input data-event></div></div><label>Payload JSON</label><textarea data-payload></textarea>';box.appendChild(d);d.querySelector('[data-command]').value=c.command||'toggle';d.querySelector('[data-target]').value=c.targetId||'$self';d.querySelector('[data-key]').value=c.key||'';d.querySelector('[data-value]').value=c.value||'';d.querySelector('[data-path]').value=c.path||'';d.querySelector('[data-event]').value=c.eventName||'';d.querySelector('[data-payload]').value=c.payloadJson||'{}';d.querySelector('[data-del]').onclick=()=>{w.commands.splice(i,1);renderWires(s)};d.querySelectorAll('input,select,textarea').forEach(inp=>inp.addEventListener('input',()=>{c.command=d.querySelector('[data-command]').value;c.targetId=d.querySelector('[data-target]').value;c.key=d.querySelector('[data-key]').value;c.value=d.querySelector('[data-value]').value;c.path=d.querySelector('[data-path]').value;c.eventName=d.querySelector('[data-event]').value;c.payloadJson=d.querySelector('[data-payload]').value;syncPanels()}))})}
+function syncPanels(){ensureExtras();dbEditor.value=JSON.stringify(app.db,null,2);mapViewer.value=JSON.stringify(app,null,2);backendUrl.value=app.backend?.url||'';updateStatusBar()}
+function updateStatusBar(){
+  var sbM=document.getElementById('sbMachines'),sbE=document.getElementById('sbEvents');
+  if(sbM)sbM.textContent=app.machines.length+' machines';
+  var total=Object.values(emitCounts).reduce(function(a,b){return a+b},0);
+  if(sbE)sbE.textContent=total+' fired';
+}
+function setStatus(msg){var el=document.getElementById('sbLastEvent');if(el)el.textContent=msg}
+function renderEvents(){eventList.innerHTML='';app.events.forEach((ev,i)=>{let d=document.createElement('div');d.className='card';var cnt=emitCounts[ev.name]||0;d.innerHTML='<div class="cardTop"><strong>'+esc(ev.name)+'</strong><span class="evCount">×'+cnt+'</span><div style="display:flex;gap:6px"><button class="small" data-emit>Emit</button><button class="small danger" data-del>Delete</button></div></div><pre class="mono">'+esc(JSON.stringify(ev.defaultPayload,null,2))+'</pre>';eventList.appendChild(d);d.querySelector('[data-emit]').onclick=()=>emit(ev.name,ev.defaultPayload,'manual');d.querySelector('[data-del]').onclick=()=>{snapshot();app.events.splice(i,1);renderEvents();syncPanels()}})}
+function renderTimeline(){ensureExtras();timelineList.innerHTML='';app.timeline.forEach((t,i)=>{let d=document.createElement('div');d.className='card';d.innerHTML='<div class="cardTop"><strong>'+esc(t.eventName)+'</strong><button class="small danger" data-del>Delete</button></div><div class="hint">Delay: '+esc(t.delay)+'ms</div><pre class="mono">'+esc(JSON.stringify(t.payload,null,2))+'</pre>';timelineList.appendChild(d);d.querySelector('[data-del]').onclick=()=>{snapshot();app.timeline.splice(i,1);renderTimeline();syncPanels()}})}
+function renderWireMap(){let html='';app.machines.forEach(src=>{(src.wires||[]).forEach(w=>{if(w.trigger==='click'){html+='<div class="card"><strong>'+esc(src.name)+'</strong> click wire';if(w.mode==='js')html+='<pre class="mono">'+esc((w.code||'').slice(0,260))+'</pre>';html+='</div>'}else if(w.trigger==='event'){html+='<div class="card"><strong>'+esc(src.name)+'</strong> listens to <span class="pill">'+esc(w.eventName||'')+'</span></div>'}})});app.events.forEach(ev=>{let listeners=app.machines.filter(m=>(m.wires||[]).some(w=>w.trigger==='event'&&w.eventName===ev.name));html+='<div class="card"><strong>Event:</strong> <span class="pill">'+esc(ev.name)+'</span><div class="hint">Listeners: '+(listeners.map(m=>esc(m.name)).join(' → ')||'none')+'</div></div>'});wireMap.innerHTML=html||'<div class="empty">No wires yet.</div>'}
+function runTimeline(){ensureExtras();app.timeline.forEach(t=>setTimeout(()=>emit(t.eventName,t.payload,'timeline'),Number(t.delay)||0));log('Timeline started with '+app.timeline.length+' event(s).')}
+function showExport(name,content,type){currentExport={name,content,type};exportTitle.textContent=name;exportText.value=content;exportOverlay.style.display='flex';setTimeout(()=>{exportText.focus();exportText.select()},20)}
+function downloadFile(name,content,type){
+  name=name||'machine-export.txt';
+  content=String(content||'');
+  type=type||'text/plain;charset=utf-8';
+  try{
+    const blob=new Blob([content],{type});
+    if(window.navigator&&window.navigator.msSaveOrOpenBlob){window.navigator.msSaveOrOpenBlob(blob,name);return}
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=name;
+    a.target='_blank';
+    a.rel='noopener';
+    a.style.display='none';
+    document.body.appendChild(a);
+    a.dispatchEvent(new MouseEvent('click',{view:window,bubbles:true,cancelable:true}));
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1500);
+    log('Download attempted: '+name);
+  }catch(err){
+    try{
+      const dataUrl='data:'+type+','+encodeURIComponent(content);
+      const a=document.createElement('a');
+      a.href=dataUrl;
+      a.download=name;
+      a.target='_blank';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      log('Download attempted with data URL: '+name);
+    }catch(err2){
+      exportText.value=content;
+      exportText.focus();
+      exportText.select();
+      document.execCommand('copy');
+      alert('Download was blocked, so the export was selected/copied. Paste it into a file named '+name);
+      log('Download blocked. Export copied/selected instead.');
+    }
+  }
+}
+function runtimeHtml(){
+  let map=JSON.stringify(app).replace(/</g,'\u003c');
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Machine App</title>
+<style>
+body{margin:0;font-family:system-ui;background:#080b12;color:white;padding:24px}.machine-node{margin:8px;min-height:24px}.mc-hidden{display:none!important}button,input,textarea{font:inherit;padding:10px;border-radius:10px;border:1px solid #334155}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+let app=${map};
+const pathGet=(o,p,f)=>!p?o:String(p).split('.').reduce((a,k)=>a&&a[k]!==undefined?a[k]:f,o);
+const pathSet=(o,p,v)=>{const parts=String(p).split('.');let c=o;parts.slice(0,-1).forEach(k=>{if(!c[k]||typeof c[k]!=='object')c[k]={};c=c[k]});c[parts[parts.length-1]]=v};
+function template(txt,data){let s=String(txt??''),out='',i=0;while(true){let a=s.indexOf('{{',i);if(a<0){out+=s.slice(i);break}let b=s.indexOf('}}',a+2);if(b<0){out+=s.slice(i);break}out+=s.slice(i,a);let key=s.slice(a+2,b).trim();let v=pathGet(data,key,undefined);if(v===undefined)v=pathGet(app.db,key,'');out+=v==null?'':String(v);i=b+2}return out}
+const els=new Map();const byId=id=>app.machines.find(m=>m.id===id);const childrenOf=id=>app.machines.filter(m=>m.parentId===id);
+function target(idOrDef,elOverride){const def=typeof idOrDef==='string'?byId(idOrDef):idOrDef;if(!def)return null;const el=elOverride||els.get(def.id);let api={def,el,id:def.id,name:def.name,hide(){def.state.hidden=true;if(el)el.classList.add('mc-hidden');return api},show(){def.state.hidden=false;if(el)el.classList.remove('mc-hidden');return api},toggle(){def.state.hidden=!def.state.hidden;if(el)el.classList.toggle('mc-hidden',def.state.hidden);return api},text(v){def.text=String(v??'');let hasChildren=childrenOf(def.id).length>0;let isLoopContainer=def.loop&&def.loop.mode==='children';if(el&&!hasChildren&&!isLoopContainer&&!['input','textarea','img','section'].includes(def.tag)){el.textContent=template(def.text,app.db)}return api},style(k,v){def.styles[k]=v;if(el)el.style[k]=v;return api},emit(n,p){emit(n,p,def.id);return api},dbGet:(p,f)=>pathGet(app.db,p,f),dbSet(p,v){pathSet(app.db,p,v);emit('db:changed',{path:p,value:v},def.id);return api}};return api}
+function emit(name,payload={},source='system'){let ev=app.events.find(e=>e.name===name);let p=Object.assign({},ev?.defaultPayload||{},payload);app.machines.forEach(m=>(m.wires||[]).filter(w=>w.trigger==='event'&&w.eventName===name).forEach(w=>runWire(m,w,name,p,els.get(m.id))));if(name==='db:changed'){app.machines.forEach(function(m){if(!m.dbBind)return;var v=pathGet(app.db,m.dbBind,'');var dbEl=els.get(m.id);if(dbEl&&!['input','textarea','img'].includes(m.tag))dbEl.textContent=String(v);})}}
+function isTyping(){let a=document.activeElement;return a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.tagName==='SELECT')}
+function refreshText(){app.machines.forEach(m=>{let el=els.get(m.id);let hasChildren=childrenOf(m.id).length>0;let isLoopContainer=m.loop&&m.loop.mode==='children';if(el&&!hasChildren&&!isLoopContainer&&!['input','textarea','img','section','div'].includes(m.tag)){el.textContent=template(m.text,app.db)}})}
+function runWire(def,wire,eventName,payload,el){if(wire.mode==='commands')return;let machine=target(def,el),db=app.db,events=app.events,machines=app.machines,domTree=[],emitFn=(n,p)=>emit(n,p,def.id),targetFn=id=>target(id),all=()=>app.machines.map(m=>target(m.id)),log=console.log,dbGet=(p,f)=>pathGet(app.db,p,f),dbSet=(p,v)=>{pathSet(app.db,p,v);emit('db:changed',{path:p,value:v},def.id)},dbInc=(p,a=1)=>{var nv=Number(pathGet(app.db,p,0))+Number(a);pathSet(app.db,p,nv);emit('db:changed',{path:p,value:nv},def.id)},dbPush=(p,v)=>{let arr=pathGet(app.db,p,[]);if(Array.isArray(arr))arr.push(v)},dbToggle=p=>{pathSet(app.db,p,!pathGet(app.db,p,false));refreshText()};try{new Function('payload','eventName','machine','db','events','machines','domTree','emit','target','all','log','dbGet','dbSet','dbPush','dbInc','dbToggle',wire.code)(payload,eventName,machine,db,events,machines,domTree,emitFn,targetFn,all,log,dbGet,dbSet,dbPush,dbInc,dbToggle);if(isTyping())refreshText();else refreshText()}catch(e){console.error(e)}}
+function makeEl(def,row=null,index=null){let el=document.createElement(def.tag||'div');el.className='machine-node';if(def.state?.hidden)el.classList.add('mc-hidden');Object.assign(el.style,def.styles||{});Object.entries(def.attrs||{}).forEach(([k,v])=>el.setAttribute(k,template(v,app.db)));let data=Object.assign({},app.db,row||{},{$index:index});if(['input','textarea'].includes(def.tag)){el.value=pathGet(app.db,def.bind?.path,def.attrs?.value||def.text||'');el.oninput=e=>{if(def.bind?.path){pathSet(app.db,def.bind.path,e.target.value);let ev=def.bind.event||'db:changed';let payload={path:def.bind.path,value:e.target.value,machineId:def.id};app.machines.forEach(m=>(m.wires||[]).filter(w=>w.trigger==='event'&&w.eventName===ev).forEach(w=>runWire(m,w,ev,payload,els.get(m.id))));refreshText()}}}else if(def.tag!=='img'){el.textContent=template(def.text,data)}el.onclick=e=>{e.stopPropagation();let payload={machineId:def.id,name:def.name,loopData:row,loopIndex:index,value:el.value||el.textContent};(def.wires||[]).filter(w=>w.trigger==='click').forEach(w=>runWire(def,w,'click',payload,el))};let loop=def.loop||{},arr=pathGet(app.db,loop.path,[]);if(loop.mode==='children'&&Array.isArray(arr)){arr.forEach((r,i)=>{let c=document.createElement(loop.tag||'div');c.textContent=template(loop.template||'{{name}}',Object.assign({},app.db,r,{$index:i}));c.onclick=e=>{e.stopPropagation();let payload={machineId:def.id,loopData:r,loopIndex:i,value:c.textContent};(def.wires||[]).filter(w=>w.trigger==='click').forEach(w=>runWire(def,w,'click',payload,c))};el.appendChild(c)})}els.set(def.id,el);return el}
+function renderMachine(def,parent){let loop=def.loop||{},arr=pathGet(app.db,loop.path,[]);if(loop.mode==='self'&&Array.isArray(arr)){arr.forEach((r,i)=>{let d=JSON.parse(JSON.stringify(def));d.text=loop.template||def.text;d.tag=loop.tag||def.tag;d.loop={mode:'none'};parent.appendChild(makeEl(d,r,i))});return}let el=makeEl(def);parent.appendChild(el);childrenOf(def.id).forEach(ch=>renderMachine(ch,el))}
+function render(){els.clear();let root=document.getElementById('app');root.innerHTML='';app.machines.filter(m=>!m.parentId).forEach(m=>renderMachine(m,root))}
+render();emit('app:boot',{booted:true},'system');
+<`+`/script>
+</body>
+</html>`
+}
+function addTemplate(kind){snapshot();let parent=app.selectedId||null;if(kind==='card'){app.machines.push(machine(parent,{name:'Card Template',tag:'div',text:'Card title: {{appName}}',styles:{padding:'18px',borderRadius:'16px',background:'rgba(255,255,255,.10)',border:'1px solid rgba(255,255,255,.18)'}}))}else if(kind==='button'){let ev='custom:event';if(!app.events.some(e=>e.name===ev))app.events.push({name:ev,defaultPayload:{ok:true}});app.machines.push(machine(parent,{name:'Event Button',tag:'button',text:'Emit Event',wires:[{id:uid(),trigger:'click',eventName:ev,mode:'js',code:"emit('custom:event',{ok:true,source:machine.id});"}]}))}else if(kind==='form'){app.machines.push(machine(parent,{name:'DB Name Input',tag:'input',attrs:{placeholder:'Name'},bind:{path:'form.name',event:'db:changed'}}));app.machines.push(machine(parent,{name:'DB Name Preview',tag:'p',text:'Name: {{form.name}}',wires:[{id:uid(),trigger:'event',eventName:'db:changed',mode:'js',code:"if(payload.path==='form.name') machine.text('Name: '+payload.value);"}]}))}else if(kind==='list'){app.machines.push(machine(parent,{name:'Loop List',tag:'div',text:'',styles:{display:'grid',gap:'8px'},loop:{mode:'children',path:'products',tag:'button',template:'{{name}} - {{price}}'},wires:[{id:uid(),trigger:'click',eventName:'product:clicked',mode:'js',code:"if(payload.loopData){ emit('product:clicked',payload.loopData); }"}]}))}else if(kind==='panel'){app.machines.push(machine(parent,{name:'Toggle Panel',tag:'div',text:'Toggle me with target().toggle()',styles:{padding:'14px',borderRadius:'14px',background:'rgba(110,231,255,.10)'}}))}renderCanvas();renderEvents();syncPanels()}
+var STYLE_PRESETS={
+  'flex-col':{display:'flex','flex-direction':'column',gap:'10px'},
+  'flex-row':{display:'flex','flex-direction':'row',gap:'10px','align-items':'center'},
+  'grid-2':{display:'grid','grid-template-columns':'1fr 1fr',gap:'10px'},
+  'card':{padding:'18px',borderRadius:'16px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.12)'},
+  'hero':{padding:'40px 24px',textAlign:'center',borderRadius:'20px',background:'linear-gradient(135deg,rgba(110,231,255,.12),rgba(124,58,237,.12))'},
+  'center':{display:'flex',alignItems:'center',justifyContent:'center'},
+  'badge-s':{display:'inline-flex',alignItems:'center',padding:'4px 10px',borderRadius:'999px',background:'rgba(110,231,255,.15)',border:'1px solid rgba(110,231,255,.35)',fontSize:'12px'},
+  'chip':{padding:'6px 14px',borderRadius:'999px',background:'rgba(255,255,255,.1)',fontSize:'13px',cursor:'pointer'},
+  'clear':{}
+};
+function applyStylePreset(name){
+  var s=byId(app.selectedId);
+  if(!s){setStatus('No machine selected');return}
+  if(s.locked){setStatus('Machine is locked');return}
+  snapshot();
+  s.styles=name==='clear'?{}:Object.assign({},s.styles,STYLE_PRESETS[name]||{});
+  renderCanvas();loadInspector();setStatus('Preset: '+name);
+}
+function applyZoom(){
+  var c=document.getElementById('canvas');
+  if(c){c.style.zoom=zoomPct/100;}
+  var lbl=document.getElementById('zoomLabel');
+  if(lbl)lbl.textContent=zoomPct+'%';
+}
+function moveSelected(dir){let s=byId(app.selectedId);if(!s)return;let siblings=app.machines.filter(m=>m.parentId===s.parentId);let ids=siblings.map(m=>m.id);let pos=ids.indexOf(s.id);let swap=dir==='up'?pos-1:pos+1;if(swap<0||swap>=siblings.length)return;snapshot();let a=app.machines.indexOf(siblings[pos]),b=app.machines.indexOf(siblings[swap]);[app.machines[a],app.machines[b]]=[app.machines[b],app.machines[a]];renderCanvas();selectMachine(s.id)}
+function moveToRoot(){let s=byId(app.selectedId);if(!s)return;snapshot();s.parentId=null;renderCanvas();selectMachine(s.id)}
+function wrapSelected(){let s=byId(app.selectedId);if(!s||s.id==='root')return;snapshot();let wrapper=machine(s.parentId,{name:'Wrapper Div',tag:'div',text:'',styles:{padding:'12px',borderRadius:'14px',border:'1px dashed rgba(110,231,255,.45)'}});app.machines.push(wrapper);s.parentId=wrapper.id;renderCanvas();selectMachine(wrapper.id)}
+async function pushBackend(){ensureExtras();app.backend.url=backendUrl.value.trim();if(!app.backend.url)return alert('Enter a backend URL first.');let res=await fetch(app.backend.url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(app)});log('Backend push status: '+res.status)}
+async function pullBackend(){ensureExtras();app.backend.url=backendUrl.value.trim();if(!app.backend.url)return alert('Enter a backend URL first.');let res=await fetch(app.backend.url);let data=await res.json();snapshot();app=data;ensureExtras();renderCanvas();loadInspector();renderEvents();renderTimeline();renderWireMap();syncPanels();log('Backend pull status: '+res.status)}
+['click','mousedown'].forEach(ev=>document.querySelector('.right').addEventListener(ev,e=>e.stopPropagation()));
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('tab-'+t.dataset.tab).classList.add('active');renderEvents();syncPanels()});
+addMachineBtn.onclick=()=>{snapshot();let m=machine(app.selectedId||null);app.machines.push(m);renderCanvas();selectMachine(m.id)};addChildBtn.onclick=()=>{let s=byId(app.selectedId);if(!s)return;snapshot();let c=machine(s.id,{name:'Child Machine'});app.machines.push(c);renderCanvas();selectMachine(c.id)};applyMachineBtn.onclick=()=>{snapshot();applyInspector()};duplicateBtn.onclick=()=>{let s=byId(app.selectedId);if(!s)return;snapshot();let c=clone(s);c.id=uid();c.name+=' Copy';app.machines.push(c);renderCanvas();selectMachine(c.id)};deleteBtn.onclick=()=>{if(!app.selectedId||app.selectedId==='root')return;snapshot();let id=app.selectedId;app.machines=app.machines.filter(m=>m.id!==id&&m.parentId!==id);app.selectedId=null;renderCanvas();loadInspector()};moveUpBtn.onclick=()=>moveSelected('up');moveDownBtn.onclick=()=>moveSelected('down');outdentBtn.onclick=moveToRoot;wrapBtn.onclick=wrapSelected;addJsWireBtn.onclick=()=>{let s=byId(app.selectedId);if(!s)return;s.wires.push({id:uid(),trigger:'click',eventName:app.events[0]?.name||'app:boot',mode:'js',code:"log('clicked '+machine.name);"});renderWires(s)};addCmdWireBtn.onclick=()=>{let s=byId(app.selectedId);if(!s)return;s.wires.push({id:uid(),trigger:'click',eventName:app.events[0]?.name||'app:boot',mode:'commands',commands:[{command:'toggle',targetId:'$self',value:'',payloadJson:'{}'}]});renderWires(s)};
+addEventBtn.onclick=()=>{if(!newEventName.value.trim())return;snapshot();app.events.push({name:newEventName.value.trim(),defaultPayload:parseJson(newEventPayload.value,{})});newEventName.value='';newEventPayload.value='{}';renderEvents();renderWireMap();syncPanels()};applyDbBtn.onclick=()=>{snapshot();app.db=parseJson(dbEditor.value,app.db);renderCanvas()};saveJsonBtn.onclick=()=>showExport('machine-app-map.json',JSON.stringify(app,null,2),'application/json');exportHtmlBtn.onclick=()=>showExport('built-machine-app.html',runtimeHtml(),'text/html');copyExportBtn.onclick=()=>{exportText.select();document.execCommand('copy')};downloadExportBtn.onclick=()=>{
+  if(!currentExport.content){
+    currentExport.content=exportText.value;
+    currentExport.name=exportTitle.textContent||'machine-export.txt';
+    currentExport.type=currentExport.name.endsWith('.html')?'text/html;charset=utf-8':'application/json;charset=utf-8';
+  }
+  downloadFile(currentExport.name,currentExport.content,currentExport.type);
+};closeExportBtn.onclick=()=>exportOverlay.style.display='none';function normalizeImportedMap(data){
+  if(!data || typeof data !== 'object') throw new Error('Imported file is not a JSON object.');
+  if(data.machineMap && data.machineMap.machines) data = data.machineMap;
+  if(!Array.isArray(data.machines)) throw new Error('Imported JSON does not contain a machines array.');
+  if(!Array.isArray(data.events)) data.events=[];
+  if(!data.db || typeof data.db !== 'object') data.db={};
+  data.selectedId=null;
+  data.machines.forEach(m=>{
+    m.attrs=m.attrs||{};
+    m.styles=m.styles||{};
+    m.bind=m.bind||{path:'',event:'db:changed'};
+    if(m.bind.valuePath && !m.bind.path) m.bind.path=m.bind.valuePath;
+    if(m.bind.emitEvent && !m.bind.event) m.bind.event=m.bind.emitEvent;
+    m.loop=m.loop||{mode:'none',path:'',tag:'div',template:''};
+    m.wires=m.wires||[];
+    m.state=m.state||{hidden:false,classes:[]};m.notes=m.notes||'';m.color=m.color||'#6ee7ff';m.locked=m.locked||false;m.dbBind=m.dbBind||'';
+    if(!Array.isArray(m.state.classes)) m.state.classes=[];
+  });
+  app=data;
+  ensureExtras();
+}
+function importJsonFile(file){
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      snapshot();
+      normalizeImportedMap(JSON.parse(reader.result));
+      renderCanvas();
+      loadInspector();
+      renderEvents();
+      renderTimeline();
+      renderWireMap();
+      syncPanels();emit('app:boot',{booted:true},'system');
+      log('Imported JSON: '+file.name);
+    }catch(err){
+      alert('Import failed: '+err.message);
+      log('Import failed: '+err.message);
+    }
+  };
+  reader.onerror=()=>alert('Could not read file.');
+  reader.readAsText(file);
+}
+document.addEventListener('keydown',e=>{
+  var tag=document.activeElement?.tagName;
+  var typing=tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT';
+  if(e.key==='Escape'&&!typing){
+    app.selectedId=null;
+    document.querySelectorAll('.machine-node.selected').forEach(x=>x.classList.remove('selected'));
+    document.getElementById('selectedPill').textContent='none';
+    renderTree();return;
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){
+    e.preventDefault();
+    localStorage.setItem('machineConstantBuilderV4',JSON.stringify(app));
+    setStatus('Saved ✓');log('Ctrl+S: saved');return;
+  }
+  if(typing)return;
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key==='z'){e.preventDefault();undo();return}
+  if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.shiftKey&&e.key==='Z'))){e.preventDefault();redo();return}
+  if((e.ctrlKey||e.metaKey)&&e.key==='d'){
+    e.preventDefault();
+    var s=byId(app.selectedId);if(!s)return;
+    snapshot();var c=clone(s);c.id=uid();c.name+=' Copy';
+    c.wires=(c.wires||[]).map(w=>Object.assign({},w,{id:uid()}));
+    app.machines.push(c);renderCanvas();selectMachine(c.id);
+    setStatus('Duplicated: '+c.name);return;
+  }
+  if((e.key==='Delete')&&app.selectedId&&app.selectedId!=='root'){
+    e.preventDefault();
+    var sel=byId(app.selectedId);
+    if(sel&&sel.locked){setStatus('Locked — cannot delete');return}
+    if(confirm('Delete "'+sel?.name+'"?')){
+      snapshot();var id=app.selectedId;
+      app.machines=app.machines.filter(m=>m.id!==id&&m.parentId!==id);
+      app.selectedId=null;renderCanvas();loadInspector();
+    }return;
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key==='='){e.preventDefault();zoomPct=Math.min(200,zoomPct+10);applyZoom()}
+  if((e.ctrlKey||e.metaKey)&&e.key==='-'){e.preventDefault();zoomPct=Math.max(30,zoomPct-10);applyZoom()}
+  if((e.ctrlKey||e.metaKey)&&e.key==='0'){e.preventDefault();zoomPct=100;applyZoom()}
+});
+document.getElementById('importJsonBtn').onclick=()=>{
+  const input=document.getElementById('jsonFileInput');
+  input.value='';
+  input.click();
+};
+document.getElementById('jsonFileInput').onchange=e=>importJsonFile(e.target.files[0]);resetBtn.onclick=()=>{snapshot();app=starter();ensureExtras();appLog=[];renderCanvas();loadInspector();renderEvents();renderTimeline();renderWireMap();syncPanels()};bootBtn.onclick=()=>emit('app:boot',{booted:true},'manual');refreshBtn.onclick=renderCanvas;clearSelBtn.onclick=()=>{app.selectedId=null;selectOnly('')};clearLogBtn.onclick=()=>{appLog=[];renderLog()};canvas.onclick=()=>{app.selectedId=null;selectedPill.textContent='none';document.querySelectorAll('.machine-node.selected').forEach(e=>e.classList.remove('selected'));renderTree()};
+undoBtn.onclick=undo;redoBtn.onclick=redo;localSaveBtn.onclick=()=>{localStorage.setItem('machineConstantBuilderV4',JSON.stringify(app));log('Saved to localStorage.')};localLoadBtn.onclick=()=>{let saved=localStorage.getItem('machineConstantBuilderV4');if(!saved)return alert('No local save found.');snapshot();app=JSON.parse(saved);ensureExtras();renderCanvas();loadInspector();renderEvents();renderTimeline();renderWireMap();syncPanels();emit('app:boot',{booted:true},'system');log('Loaded from localStorage.')};addTemplateBtn.onclick=()=>addTemplate(templateSelect.value);
+document.getElementById('zoomInBtn')?.addEventListener('click',()=>{zoomPct=Math.min(zoomPct+10,200);applyZoom()});
+document.getElementById('zoomOutBtn')?.addEventListener('click',()=>{zoomPct=Math.max(zoomPct-10,30);applyZoom()});
+document.getElementById('zoomResetBtn')?.addEventListener('click',()=>{zoomPct=100;applyZoom()});
+document.getElementById('canvas')?.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zoomPct=Math.min(200,Math.max(30,zoomPct+(e.deltaY<0?10:-10)));applyZoom()}},{passive:false});addTimelineBtn.onclick=()=>{ensureExtras();snapshot();app.timeline.push({delay:Number(timelineDelay.value)||0,eventName:timelineEvent.value.trim()||'app:boot',payload:parseJson(timelinePayload.value,{})});renderTimeline();syncPanels()};runTimelineBtn.onclick=runTimeline;pullBackendBtn.onclick=()=>pullBackend().catch(e=>alert('Pull failed: '+e.message));pushBackendBtn.onclick=()=>pushBackend().catch(e=>alert('Push failed: '+e.message));refreshWireMapBtn.onclick=renderWireMap;backendUrl.oninput=()=>{ensureExtras();app.backend.url=backendUrl.value;syncPanels()};renderCanvas();renderEvents();renderTimeline();renderWireMap();syncPanels();emit('app:boot',{booted:true},'system');
+</script>
+</body>
+</html>
